@@ -3,7 +3,7 @@
 * Names: 
 * Student IDs:
 * GitHub Name:
-* Group Name:
+* Group Name: Baha Blast
 * Project: Basic File System
 *
 * File: b_io.c
@@ -53,7 +53,7 @@ b_io_fd b_getFCB ()
 	{
 	for (int i = 0; i < MAXFCBS; i++)
 		{
-		if (fcbArray[i].buff == NULL)
+		if (fcbArray[i].buf == NULL)
 			{
 			return i;		//Not thread safe (But do not worry about it for this assignment)
 			}
