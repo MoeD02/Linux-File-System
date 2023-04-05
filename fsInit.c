@@ -1,18 +1,18 @@
 /**************************************************************
-* Class:  CSC-415-0# Fall 2021
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name:
-* Project: Basic File System
-*
-* File: fsInit.c
-*
-* Description: Main driver for file system assignment.
-*
-* This file is where you will start and initialize your system
-*
-**************************************************************/
+ * Class:  CSC-415-0# Fall 2021
+ * Names:
+ * Student IDs:
+ * GitHub Name:
+ * Group Name:
+ * Project: Basic File System
+ *
+ * File: fsInit.c
+ *
+ * Description: Main driver for file system assignment.
+ *
+ * This file is where you will start and initialize your system
+ *
+ **************************************************************/
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -24,11 +24,11 @@
 #include "mfs.h"
 #include "fs_structs.h"
 
-VCB * vcb;
-BitMap * bitmap;
-DirectoryEntry * dir_entry;
-//Init: VCB, BitMap, DirEntry - Root
-// returns: 1 = sucess
+VCB *vcb;
+BitMap *bitmap;
+DirectoryEntry *dir_entry;
+// Init: VCB, BitMap, DirEntry - Root
+//  returns: 1 = sucess
 //		   -1 = error
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
@@ -44,13 +44,15 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	}
 	init_vcb(blockSize, numberOfBlocks);
 	init_bitmap();
+	int smthn=init_root();
 	test_bitmap();
 
 	// DirEntry
 	return 0;
 }
 
-int init_vcb(int blockSize, int numberOfBlocks){
+int init_vcb(int blockSize, int numberOfBlocks)
+{
 	vcb->magic_n = MAGIC_NUMBER;
 	vcb->block_size = blockSize;
 	vcb->number_of_blocks = numberOfBlocks;
@@ -64,30 +66,61 @@ int init_vcb(int blockSize, int numberOfBlocks){
 	vcb->bitmap_total = bitmap_blocks;
 	return 1;
 }
+
+int init_root()
+{
+	int dir_size = sizeof(DirectoryEntry);
+	int numberOfEntries = MAX_ENTRIES;
+	int numberOfBlocks=dir_size*numberOfEntries;
+	int blocksNeeded = (numberOfEntries * dir_size + MINBLOCKSIZE - 1) / MINBLOCKSIZE;
+	int temp = blocksNeeded * MINBLOCKSIZE;
+	dir_entry = malloc(blocksNeeded * MINBLOCKSIZE);
+	if (dir_entry == NULL)
+	{
+		perror("Failed to allocate memory for the root directory");
+		return -1;
+	}
+	printf("NUMBER: %d\n", temp);
+	for (int i = 0; i < blocksNeeded; i++)
+	{	
+		dir_entry[i].file_name[0]=' ';
+		for(int j=0; j<MAX_ENTRIES;j++){
+			dir_entry[i].data_locations[j]=0;
+		}
+		dir_entry[i].type=0;
+		dir_entry[i].file_size=0;
+		dir_entry[i].creation_date=time(NULL);
+		dir_entry[i].last_access=time(NULL);
+		dir_entry[i].last_mod=time(NULL);
+	}
+}
+
 // inits bitmap and marks vcb and bitmap blocks as used
-int init_bitmap(){
+int init_bitmap()
+{
 	int bytes = vcb->bitmap_total * vcb->block_size;
 	bitmap = malloc(sizeof(BitMap) + bytes * sizeof(int));
 	short used_space = 1 + vcb->bitmap_total;
-	for(int i = 0; i < used_space; i++){
+	for (int i = 0; i < used_space; i++)
+	{
 		bitmap->bitmap[i] = 1; // used
 	}
-	for(int i = used_space + 1; i < bytes; i++){
+	for (int i = used_space + 1; i < bytes; i++)
+	{
 		bitmap->bitmap[i] = 0; // unused
 	}
 	return 1;
 }
 // prints bitmap in backwards order
-void test_bitmap(){
+void test_bitmap()
+{
 	printf("\n");
 	int bytes = vcb->bitmap_total * vcb->block_size;
-	for(int j = bytes - 1; j >=0; j--){
-		printf("%d\t%d\n", bitmap->bitmap[j], j);
-	}
+	// for(int j = bytes - 1; j >=0; j--){
+	// 	printf("%d\t%d\n", bitmap->bitmap[j], j);
+	// }
 	printf("%d\n", bytes);
 }
-
-
 
 void exitFileSystem()
 {
