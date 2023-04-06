@@ -44,14 +44,14 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	}
 	init_vcb(blockSize, numberOfBlocks);
 	init_bitmap();
-	int smthn=init_root();
+	init_root(blockSize);
 	test_bitmap();
 
 	// DirEntry
 	return 0;
 }
 
-int init_vcb(int blockSize, int numberOfBlocks)
+int init_vcb(uint64_t blockSize, uint64_t numberOfBlocks)
 {
 	vcb->magic_n = MAGIC_NUMBER;
 	vcb->block_size = blockSize;
@@ -67,21 +67,22 @@ int init_vcb(int blockSize, int numberOfBlocks)
 	return 1;
 }
 
-int init_root()
+int init_root(uint64_t blockSize)
 {
-	int dir_size = sizeof(DirectoryEntry);
-	int numberOfEntries = MAX_ENTRIES;
-	int numberOfBlocks=dir_size*numberOfEntries;
-	int blocksNeeded = (numberOfEntries * dir_size + MINBLOCKSIZE - 1) / MINBLOCKSIZE;
-	int temp = blocksNeeded * MINBLOCKSIZE;
-	dir_entry = malloc(blocksNeeded * MINBLOCKSIZE);
+	
+	int size_to_be_malloced= MAX_ENTRIES*sizeof(DirectoryEntry);
+	int num_of_blocks= (size_to_be_malloced+(blockSize-1))/blockSize;
+	dir_entry = malloc(size_to_be_malloced);
+	printf("SIZE NEEDED: %d\nnum_Of_Blocks: %d\n Size of struct: %d\n",
+	size_to_be_malloced,num_of_blocks,sizeof(DirectoryEntry));
+
+
 	if (dir_entry == NULL)
 	{
 		perror("Failed to allocate memory for the root directory");
 		return -1;
 	}
-	printf("NUMBER: %d\n", temp);
-	for (int i = 0; i < blocksNeeded; i++)
+	for (int i = 0; i < MAX_ENTRIES; i++)
 	{	
 		dir_entry[i].file_name[0]=' ';
 		for(int j=0; j<MAX_ENTRIES;j++){
@@ -121,7 +122,9 @@ void test_bitmap()
 	// }
 	printf("%d\n", bytes);
 }
+int return_index_of_free_blocks(int number_of_requested_blocks){
 
+}
 void exitFileSystem()
 {
 	printf("System exiting\n");
