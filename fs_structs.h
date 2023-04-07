@@ -1,3 +1,20 @@
+/**************************************************************
+* Class:  CSC-415-02 Fall 2021
+* Names: Diego Flores
+* Student IDs:	920372463
+* GitHub Name: DiegoF001
+* Group Name: The Baha Blast
+* Project: Basic File System
+*
+* File: fs_structs.h
+*
+* Description: This file contains the structs for our VCB,
+*               Bitmap, and Directory Entries, as well as some
+*               additonal information that the initialization
+*               of file system needs.
+*
+**************************************************************/
+
 #ifndef FS_STRUCTS
 #define FS_STRUCTS .H
 #include <stdio.h>

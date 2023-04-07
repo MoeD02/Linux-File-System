@@ -1,9 +1,9 @@
 /**************************************************************
-* Class:  CSC-415-0# Fall 2021
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name: Baha Blast
+* Class:  CSC-415-02 Fall 2021
+* Names: Diego Flores
+* Student IDs:	920372463
+* GitHub Name: DiegoF001
+* Group Name: The Baha Blast
 * Project: Basic File System
 *
 * File: b_io.c
