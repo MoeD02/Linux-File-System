@@ -38,9 +38,8 @@ we divide (3605)/512=#of block we're currently on.
 //. --> data_locations[0].name '..'?
 
 typedef struct DirectoryEntry
-{                                             // padding + 50
-    char parent_name[128];                    //Parent Name
-    char file_name[128];                      // File Name
+{                                             //Parent Name
+    char file_name[280];                      // File Name
     unsigned int data_locations[MAX_ENTRIES]; // Array containing locations of file
     unsigned int type;                        // Either File or Directory Entry
     unsigned int file_size;                   // File Size in Bytes

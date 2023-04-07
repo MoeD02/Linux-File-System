@@ -38,28 +38,31 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	LBAread(vcb, 1, 0);
 	if (vcb->magic_n == MAGIC_NUMBER)
 	{
+		printf("Already initialized: \n***%d***\n", vcb->free_blocks);
 		free(vcb);
 		return 1;
 	}
-	//int result = startPartitionSystem("test", &numberOfBlocks, &blockSize);
 
-	init_vcb(blockSize, numberOfBlocks);
-	init_bitmap();
+	init_vcb(numberOfBlocks, blockSize);
+	init_bitmap(); 
 	init_root(blockSize);
+	LBAwrite(vcb, 1, 0);
+	LBAwrite(bitmap, vcb->bitmap_total, 1);
+
+	free(bitmap);
+	free(dir_entry);
 	test_bitmap();
-	//printf("Result: %d\n", result);
-	//closePartitionSystem();
 
 	// DirEntry
 	return 0;
 }
 
-int init_vcb(uint64_t blockSize, uint64_t numberOfBlocks)
+int init_vcb(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 	vcb->magic_n = MAGIC_NUMBER;
 	vcb->block_size = blockSize;
 	vcb->number_of_blocks = numberOfBlocks;
-	vcb->free_blocks = numberOfBlocks;
+	vcb->free_blocks = numberOfBlocks - 1;
 	int bitmap_blocks = 0;
 	// to bytes:
 	bitmap_blocks = (numberOfBlocks + (8 - 1)) / 8;
@@ -67,7 +70,8 @@ int init_vcb(uint64_t blockSize, uint64_t numberOfBlocks)
 	bitmap_blocks = (bitmap_blocks + (blockSize - 1)) / blockSize;
 	// this is how many blocks bitmap will occupy
 	vcb->bitmap_total = bitmap_blocks;
-	LBAwrite(vcb, 1, 0);
+	printf("****VCB bitmap total: %d\n", vcb->bitmap_total);
+	vcb->free_blocks -= bitmap_blocks;
 	return 1;
 }
 
@@ -75,10 +79,10 @@ int init_root(uint64_t blockSize)
 {
 	DirectoryEntry dir_entries[MAX_ENTRIES];
 	int size = MAX_ENTRIES * sizeof(DirectoryEntry);
-	int num_of_blocks = (size + (blockSize - 1)) / blockSize;
-	//dir_entry = malloc(size_to_be_malloced);
-	printf("SIZE NEEDED: %d\nnum_Of_Blocks: %d\n Size of struct: %ld\n",
-		   size, num_of_blocks, sizeof(DirectoryEntry));
+	int size_to_be_malloced = 512 * MAX_ENTRIES;
+	//dir_entries = malloc(size_to_be_malloced);
+	//printf("SIZE NEEDED: %d\nnum_Of_Blocks: %d\n Size of struct: %ld\n",
+	//	   size, num_of_blocks, sizeof(DirectoryEntry));
 
 	// if (dir_entry == NULL)
 	// {
@@ -88,7 +92,7 @@ int init_root(uint64_t blockSize)
 	// each has locations for their data
 	printf("%d\n", MAX_ENTRIES);
 	dir_entries[0].file_name[0] = '.';
-	//..
+
 	dir_entries[1].file_name[0] = '.';
 	dir_entries[1].file_name[1] = '.';
 
@@ -105,7 +109,9 @@ int init_root(uint64_t blockSize)
 	dir_entries[1].last_mod = time(NULL);
 
 	unsigned int root_index = get_next_free();
+	int write_to = root_index;
 	vcb->root = root_index;
+	//Update locations of root
 	for (int i = 0; i < MAX_ENTRIES; i++)
 	{
 		dir_entries[0].data_locations[i] = root_index;
@@ -120,11 +126,10 @@ int init_root(uint64_t blockSize)
 		dir_entries[i].type = -1;
 		dir_entries[i].file_size = 0;
 	}
-	short used = 1 + vcb->bitmap_total;
-	vcb->bitmap_total += num_of_blocks;
-	vcb->free_blocks -= num_of_blocks;
+	vcb->free_blocks -= MAX_ENTRIES;
 
-	LBAwrite(&dir_entries, num_of_blocks, used);
+	printf("\n*****%d\n", write_to);
+	LBAwrite(dir_entries, MAX_ENTRIES, write_to);
 	return 1;
 }
 
@@ -142,7 +147,6 @@ int init_bitmap()
 	{
 		bitmap->bitmap[i] = UNUSED;
 	}
-	LBAwrite(bitmap, vcb->bitmap_total, 1);
 	return 1;
 }
 // prints bitmap in backwards order
@@ -150,10 +154,10 @@ void test_bitmap()
 {
 	printf("\n");
 	int bytes = vcb->bitmap_total * vcb->block_size;
-	// for(int j = bytes - 1; j >=0; j--){
-	// 	printf("%d\t%d\n", bitmap->bitmap[j], j);
-	// }
-	printf("%d\n", bytes);
+	for (int j = bytes - 1; j >= 0; j--)
+	{
+		printf("%d\t%d\n", bitmap->bitmap[j], j);
+	}
 }
 
 // returns index in blocks
