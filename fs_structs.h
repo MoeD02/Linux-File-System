@@ -41,19 +41,6 @@ typedef struct BitMap
     unsigned int bitmap[]; // To keep track of free spaces
 } BitMap;
 
-/*
-Lets say we have 50 max entries, which is 36 blocks, and then that means
-let's say you want entry number 5, how would you go about finding that?
-sizeof(DirectoryEntry), which gives us 360 bytes, so the 5th entry would be
-3605 which would give us the starting byte. If we want the starting block
-we divide (3605)/512=#of block we're currently on.
-*/
-//Padding could be useful
-//Add more chars to file and parent name to avoid padding?
-
-//. -->parent ' '
-//. --> data_locations[0].name '..'?
-
 typedef struct DirectoryEntry
 {                                             //Parent Name
     char file_name[280];                      // File Name
