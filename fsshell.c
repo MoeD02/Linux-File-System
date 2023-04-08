@@ -1,7 +1,7 @@
 /**************************************************************
 * Class:  CSC-415-02 Fall 2021
-* Names: Diego Flores
-* Student IDs:	920372463
+* Names: Diego Flores, Kemi Adebisi
+* Student IDs:	920372463, 921140633
 * GitHub Name: DiegoF001
 * Group Name: The Baha Blast
 * Project: Basic File System
