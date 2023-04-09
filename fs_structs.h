@@ -1,33 +1,60 @@
+/**************************************************************
+* Class:  CSC-415-02 Fall 2021
+* Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
+* Student IDs:	920372463, 921140633, 921246050
+* GitHub Name: DiegoF001
+* Group Name: The Baha Blast
+* Project: Basic File System
+*
+* File: fs_structs.h
+*
+* Description: This file contains the structs for our VCB,
+*               Bitmap, and Directory Entries, as well as some
+*               additonal information that the initialization
+*               of file system needs.
+*
+**************************************************************/
 
-#ifndef FS_STRUCTS.H
+#ifndef FS_STRUCTS
 #define FS_STRUCTS .H
 #include <stdio.h>
 #include <time.h>
-#define MAX_BLOCKS 1000
-
+#define MAX_ENTRIES 50
+#define UNUSED 0
+#define USED 1
+#define FILE 1
+#define DIR 0
+#define MAGIC_NUMBER 0x4261686100000000
 // Needs to take only 1 block
 typedef struct VCB
 {
-    unsigned int magic_n;          // Validity of File System
+    unsigned long magic_n;         // Validity of File System
     unsigned int root;             // Pos of root
     unsigned int block_size;       // Will be 512
     unsigned int free_blocks;      // Number of free blocks
     unsigned int number_of_blocks; // Total number of blocks in VCB
+    unsigned int bitmap_total;     //total number of blocks ocupied by bitmap
 } VCB;
-
-// Could take multiple blocks
 typedef struct BitMap
 {
-    unsigned int bitmap[MAX_BLOCKS]; // To keep track of free spaces
+    size_t size;
+    unsigned int bitmap[]; // To keep track of free spaces
 } BitMap;
 
 typedef struct DirectoryEntry
-{                                    // home -> 20
-                                     // [1,2,3], 4, 5 , [6,7], 8 .....] 3
-    char file_name[128];             // File Name
-    unsigned int data_locations[20]; // Array containing locations of file
-    unsigned int type;               // Either File or Directory Entry
-    unsigned int file_size;          // File Size in Bytes
-    time_t creation_date;            // When was it Created
+{                                             //Parent Name
+    char file_name[280];                      // File Name
+    unsigned int data_locations[MAX_ENTRIES]; // Array containing locations of file
+    unsigned int type;                        // Either File or Directory Entry
+    unsigned int file_size;                   // File Size in Bytes
+    time_t creation_date;                     // When was it Created
+    time_t last_access;                       // when it was last accessed
+    time_t last_mod;                          // when it was last modified
 } DirectoryEntry;
+
+int init_vcb(uint64_t, uint64_t);
+int init_bitmap();
+int init_root(uint64_t);
+int get_next_free();
+void test_bitmap();
 #endif

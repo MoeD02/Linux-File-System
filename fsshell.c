@@ -1,9 +1,9 @@
 /**************************************************************
-* Class:  CSC-415-0# - Fall 2022
-* Names: 
-* Student IDs:
-* GitHub Name:
-* Group Name:
+* Class:  CSC-415-02 Fall 2021
+* Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
+* Student IDs:	920372463, 921140633, 921246050
+* GitHub Name: DiegoF001
+* Group Name: The Baha Blast
 * Project: Basic File System
 *
 * File: fsShell.c
