@@ -23,7 +23,7 @@
 #include "fsLow.h"
 #include "mfs.h"
 #include "fs_structs.h"
-
+#include "directory.h"
 VCB *vcb;
 BitMap *bitmap;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
@@ -46,8 +46,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 
 	init_vcb(numberOfBlocks, blockSize);
 	init_bitmap();
-
-	init_root(blockSize);
+	init_root(blockSize,NULL);
 	LBAwrite(vcb, 1, 0);
 	LBAwrite(bitmap, vcb->bitmap_total, 1);
 
@@ -75,60 +74,60 @@ int init_vcb(uint64_t numberOfBlocks, uint64_t blockSize)
 	return 1;
 }
 
-// Inits Root and 48 other entries
-int init_root(uint64_t blockSize)
-{
-	DirectoryEntry dir_entries[MAX_ENTRIES];
-	int size = MAX_ENTRIES * sizeof(DirectoryEntry);
-	memset(&dir_entries[0], 0, vcb->block_size);
-	memset(&dir_entries[1], 0, vcb->block_size);
+// // Inits Root and 48 other entries
+// int init_root(uint64_t blockSize)
+// {
+// 	DirectoryEntry dir_entries[MAX_ENTRIES];
+// 	int size = MAX_ENTRIES * sizeof(DirectoryEntry);
+// 	memset(&dir_entries[0], 0, vcb->block_size);
+// 	memset(&dir_entries[1], 0, vcb->block_size);
 
-	//Root: .
-	dir_entries[0].file_name[0] = '.';
-	//Root: .. 
-	dir_entries[1].file_name[0] = '.';
-	dir_entries[1].file_name[1] = '.';
+// 	//Root: .
+// 	dir_entries[0].file_name[0] = '.';
+// 	//Root: .. 
+// 	dir_entries[1].file_name[0] = '.';
+// 	dir_entries[1].file_name[1] = '.';
 
-	dir_entries[0].type = DIR;
-	dir_entries[0].file_size = size;
-	// will set to current time
-	dir_entries[0].creation_date = time(NULL);
-	dir_entries[0].last_access = time(NULL);
-	dir_entries[0].last_mod = time(NULL);
+// 	dir_entries[0].type = DIR;
+// 	dir_entries[0].file_size = size;
+// 	// will set to current time
+	// dir_entries[0].creation_date = time(NULL);
+	// dir_entries[0].last_access = time(NULL);
+	// dir_entries[0].last_mod = time(NULL);
 
-	dir_entries[1].type = DIR;
-	dir_entries[1].file_size = size;
-	dir_entries[1].creation_date = time(NULL);
-	dir_entries[1].last_access = time(NULL);
-	dir_entries[1].last_mod = time(NULL);
+// 	dir_entries[1].type = DIR;
+// 	dir_entries[1].file_size = size;
+// 	dir_entries[1].creation_date = time(NULL);
+// 	dir_entries[1].last_access = time(NULL);
+// 	dir_entries[1].last_mod = time(NULL);
 
-	// Get first index of first free spot
-	unsigned short root_index = get_next_free();
-	unsigned int write_to = root_index;
-	vcb->root = root_index;
-	// Update locations of root
-	for (int i = 0; i < MAX_ENTRIES; i++)
-	{
-		dir_entries[0].data_locations[i] = root_index;
-		dir_entries[1].data_locations[i] = root_index;
-		bitmap->bitmap[root_index] = USED;
-		root_index++;
-	}
-	// Init all 48 entries
-	for (int i = 2; i < MAX_ENTRIES; i++)
-	{
-		// works for some reason
-		memset(&dir_entries[i], 0, vcb->block_size);
-		dir_entries[i].file_name[0] = ' ';
-		dir_entries[i].type = -1;
-		dir_entries[i].file_size = 0;
-	}
-	//update available blocks
-	vcb->free_blocks -= MAX_ENTRIES;
-	// write Root
-	LBAwrite(dir_entries, MAX_ENTRIES, write_to);
-	return 1;
-}
+// 	// Get first index of first free spot
+// 	unsigned short root_index = get_next_free();
+// 	unsigned int write_to = root_index;
+// 	vcb->root = root_index;
+// 	// Update locations of root
+// 	for (int i = 0; i < MAX_ENTRIES; i++)
+// 	{
+// 		dir_entries[0].data_locations[i] = root_index;
+// 		dir_entries[1].data_locations[i] = root_index;
+// 		bitmap->bitmap[root_index] = USED;
+// 		root_index++;
+// 	}
+// 	// Init all 48 entries
+// 	for (int i = 2; i < MAX_ENTRIES; i++)
+// 	{
+// 		// works for some reason
+// 		memset(&dir_entries[i], 0, vcb->block_size);
+// 		dir_entries[i].file_name[0] = ' ';
+// 		dir_entries[i].type = -1;
+// 		dir_entries[i].file_size = 0;
+// 	}
+// 	//update available blocks
+// 	vcb->free_blocks -= MAX_ENTRIES;
+// 	// write Root
+// 	LBAwrite(dir_entries, MAX_ENTRIES, write_to);
+// 	return 1;
+// }
 
 // inits bitmap and marks vcb and bitmap blocks as used and unused
 int init_bitmap()
@@ -138,7 +137,7 @@ int init_bitmap()
 	short used_space = 1 + vcb->bitmap_total;
 	for (int i = 0; i < used_space; i++)
 	{
-		bitmap->bitmap[i] = USED;
+		// bitmap->bitmap[i] = USED;
 	}
 	for (int i = used_space + 1; i < bytes; i++)
 	{
