@@ -1,5 +1,12 @@
 {
+<<<<<<< HEAD
 	"files.associations": {
 		"stdio.h": "c"
 	}
+=======
+    "files.associations": {
+        "directory.h": "c",
+        "types.h": "c"
+    }
+>>>>>>> 137893b0ac7f6bad36a2dd6f3fb3a501320fa697
 }

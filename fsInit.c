@@ -25,6 +25,7 @@
 #include "fs_structs.h"
 #include "bitmap.h"
 
+#include "directory.h"
 VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
@@ -45,12 +46,11 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// 	return magic_n;
 	// }
 
-	// init_vcb(numberOfBlocks, blockSize);
-	// init_bitmap();
-
-	// init_root(blockSize);
-	// LBAwrite(vcb, 1, 0);
-	// LBAwrite(bitmap, vcb->bitmap_total, 1);
+	init_vcb(numberOfBlocks, blockSize);
+	init_bitmap();
+	init_root(blockSize,NULL);
+	LBAwrite(vcb, 1, 0);
+	LBAwrite(bitmap, vcb->bitmap_total, 1);
 
 	// free(bitmap);
 	// magic_n = vcb->magic_n;
