@@ -25,38 +25,17 @@ int bytes_needed;
 int init_bitmap(int numberOfBlocks, int blockSize)
 {
 	printf("INITIALIZING BITMAP\n");
-	bytes_needed = (numberOfBlocks + 8 - 1) / 8;
+	bytes_needed = (numberOfBlocks + 7) / 8;
 	int blocks_needed = (bytes_needed + sizeof(BitMap) + blockSize - 1) / blockSize;
 	bitmap = malloc(sizeof(BitMap) + blockSize * blocks_needed);
 	bitmap->bitmap = (int *)(bitmap + 1);
 	vcb_free = numberOfBlocks;
-	//printf("%d\t%d\n", bytes_needed, blocks_needed);
-	// for (int i = 0; i < 8; i++)
-	// {
-	// 	bit_set(0, i);
-	// }
-	//bit_set(0, 8);
-	//set_free(11);
-	//10111111
-	//set_free(5);
-	//1011111
-	// int s = 64;
-	// int *a = malloc(sizeof(int) * s);
-	// set_used(s, a);
-	// for (int i = 0; i < s; i++)
-	// {
-	// 	//printf("****%d\t%d\n", a[i], i);
-	// }
-	// bit_set(2, 73);
-	// //1111 1111 0010 - 73
-	// //1111 1111 0100 - 74
-	// set_free(s, a);
-	// for (int i = 0; i < s; i++)
-	// {
-	// 	printf("****%d\t%d\n", a[i], i);
-	// }
-
-	//LBAwrite(bitmap, blocks_needed, 1);
+	int write_amount = blocks_needed + 1;
+	for (int i = 0; i < write_amount; i++)
+	{
+		bit_set(0, i); // set vcb and bitmap itself blocks as used
+	}
+	LBAwrite(bitmap, blocks_needed, 1); // vcb will always be pos 0
 	return 1;
 }
 
@@ -81,20 +60,25 @@ int bit_free(int int_index, int bit_index)
 
 int set_free(int count, int *data_locations)
 {
-	
 	if (count <= 0 || count >= vcb_free)
 		return -1;
 	int index;
 	int k = 0;
-	for (int i = 0; i < count; i++)
+	int i;
+	int int_total = (count + 32 - 1) / 32; // get int
+	while (k < count)
 	{
-		index = data_locations[k];
-		data_locations[k] = 0;
+		i = data_locations[k] / 32;
+		index = data_locations[k]; // index in bitmap
 		bit_free(i, index);
-		k++;
+		data_locations[k] = 0; // erase
+		k++;				   // move on to next index
+		if (k == count)
+			break;
 	}
 	return 1;
 }
+
 int set_used(int count, int *data_locations)
 {
 	if (vcb_free - count <= 0)
@@ -107,13 +91,11 @@ int set_used(int count, int *data_locations)
 	{
 		for (int j = 0; j < 32; j++) //32 = size of int
 		{
-			int mask = 1 << j;
+			int mask = (1 << j);
 			if ((bitmap->bitmap[i] & mask) == 0) // if bit is 0, block is free
 			{
 				index = i * 32 + j % 32; // index of free block
-				//printf("***%d\n", k);
 				data_locations[k] = index;
-				//printf("%d\n", index);
 				bit_set(i, index);
 				k++;
 				if (k == count)
@@ -136,13 +118,3 @@ int get_next_free()
 	}
 	return -1;
 }
-
-// void test_bitmap(VCBT *vcb, BitMap *bitmap)
-// {
-// 	printf("\n");
-// 	int bytes = vcb->bitmap_total * vcb->block_size;
-// 	for (int j = bytes - 1; j >= 0; j--)
-// 	{
-// 		printf("%d\t%d\n", bitmap->bitmap[j], j);
-// 	}
-// }
