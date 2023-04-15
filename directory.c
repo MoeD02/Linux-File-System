@@ -33,7 +33,6 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
 	dir_entries[0].last_mod = dir_entries[0].creation_date;
     dir_entries[0].isDirectory = TRUE;
     dir_entries[0].size = bytes_needed;
-    //dir_entries[0].starting_block_index=assign_locations(&dir_entries[0], blockSize);
     set_used(blocks_needed,(dir_entries[0].data_locations));
     dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
 
@@ -67,15 +66,3 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
 
     return dir_entries[0].starting_block_index;
 }
-
-// int assign_locations(DirectoryEntry *dir_entry,int blockSize){
-    
-//     // (*dir_entry).size=1;
-//     // int blocks_to_be_used =((*dir_entry).size + blockSize - 1) / blockSize;
-//     // int index=0;
-//     // int starting_block_index =0;
-//     // printf("NUMBER: %d\n", blocks_to_be_used);
-//     // set_used(blocks_to_be_used, &(*dir_entry).data_locations);
-//     // starting_block_index= (*dir_entry).data_locations[0];
-//     return starting_block_index;
-// }
