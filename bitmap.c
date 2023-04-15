@@ -24,12 +24,13 @@ int vcb_free;
 int bytes_needed;
 int init_bitmap(int numberOfBlocks, int blockSize)
 {
+	printf("INITIALIZING BITMAP\n");
 	bytes_needed = (numberOfBlocks + 8 - 1) / 8;
 	int blocks_needed = (bytes_needed + sizeof(BitMap) + blockSize - 1) / blockSize;
 	bitmap = malloc(sizeof(BitMap) + blockSize * blocks_needed);
 	bitmap->bitmap = (int *)(bitmap + 1);
 	vcb_free = numberOfBlocks;
-	printf("%d\t%d\n", bytes_needed, blocks_needed);
+	//printf("%d\t%d\n", bytes_needed, blocks_needed);
 	// for (int i = 0; i < 8; i++)
 	// {
 	// 	bit_set(0, i);
@@ -44,7 +45,7 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	set_used(s, a);
 	for (int i = 0; i < s; i++)
 	{
-		printf("****%d\t%d\n", a[i], i);
+		//printf("****%d\t%d\n", a[i], i);
 	}
 	bit_set(2, 73);
 	//1111 1111 0010 - 73
@@ -112,7 +113,7 @@ int set_used(int count, int data_locations[])
 				index = i * 32 + j % 32; // index of free block
 				//printf("***%d\n", k);
 				data_locations[k] = index;
-				printf("%d\n", index);
+				//printf("%d\n", index);
 				bit_set(i, index);
 				k++;
 				if (k == count)

@@ -36,5 +36,5 @@ typedef struct DirectoryEntry
     time_t last_mod;                          // when it was last modified
 } DirectoryEntry;
 int init_root(uint64_t, DirectoryEntry*);
-int assign_locations(DirectoryEntry, int);
+int assign_locations(DirectoryEntry *dir_entry, int);
 #endif

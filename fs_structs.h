@@ -30,20 +30,6 @@ typedef struct VCB
     unsigned int bitmap_total;     //total number of blocks ocupied by bitmap
 } VCB;
 
-// typedef struct DirectoryEntry
-// {                                             //Parent Name
-//     char file_name[280];                      // File Name
-//     unsigned int data_locations[MAX_ENTRIES]; // Array containing locations of file
-//     unsigned int type;                        // Either File or Directory Entry
-//     unsigned int file_size;                   // File Size in Bytes
-//     time_t creation_date;                     // When was it Created
-//     time_t last_access;                       // when it was last accessed
-//     time_t last_mod;                          // when it was last modified
-// } DirectoryEntry;
-
 int init_vcb(uint64_t, uint64_t);
-int init_bitmap();
-//int init_root(uint64_t);
-int get_next_free();
 void test_bitmap();
 #endif
