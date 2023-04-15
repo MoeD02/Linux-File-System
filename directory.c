@@ -20,9 +20,10 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
     bytes_needed, blocks_needed, bytes_used, actual_entry_count);
     dir_entries = malloc (bytes_used);
     for(int i=2; i<actual_entry_count; i++){
-        dir_entries[i].name[0]= '\0'; 
-        for(int j=0; j<MAX_ENTRIES; j++){
-            dir_entries[i].data_locations[j]=0;
+        //dir_entries[i].name[0]= '\0'; 
+        strcpy(dir_entries[i].name,"..");
+        for(int j=0; j<actual_entry_count; j++){
+            dir_entries[i].data_locations[j]=1;
         }
     }
     //Assigning root variables
@@ -32,7 +33,10 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
 	dir_entries[0].last_mod = dir_entries[0].creation_date;
     dir_entries[0].isDirectory = TRUE;
     dir_entries[0].size = bytes_needed;
-    dir_entries[0].starting_block_index=assign_locations(&dir_entries[0], blockSize);
+    //dir_entries[0].starting_block_index=assign_locations(&dir_entries[0], blockSize);
+    set_used(blocks_needed,(dir_entries[0].data_locations));
+    dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
+
     if(parent == NULL){
         strcpy(dir_entries[1].name,"..");
         dir_entries[1].creation_date = dir_entries[0].creation_date;
@@ -59,20 +63,19 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
         printf("%d\n", dir_entries[0].data_locations[i]);
     }
     LBAwrite(dir_entries, blocks_needed, dir_entries[0].starting_block_index);
-    //LBAwrite(dir_entries, blocks_needed, 7);
     printf("\nBYTES MALLOCED : %d\n", bytes_used);
 
-    return 0;
+    return dir_entries[0].starting_block_index;
 }
 
-int assign_locations(DirectoryEntry *dir_entry,int blockSize){
+// int assign_locations(DirectoryEntry *dir_entry,int blockSize){
     
-    (*dir_entry).size=1;
-    int blocks_to_be_used =((*dir_entry).size + blockSize - 1) / blockSize;
-    int index=0;
-    int starting_block_index =0;
-    printf("NUMBER: %d\n", blocks_to_be_used);
-    set_used(blocks_to_be_used, (*dir_entry).data_locations);
-    starting_block_index= (*dir_entry).data_locations[0];
-    return starting_block_index;
-}
+//     // (*dir_entry).size=1;
+//     // int blocks_to_be_used =((*dir_entry).size + blockSize - 1) / blockSize;
+//     // int index=0;
+//     // int starting_block_index =0;
+//     // printf("NUMBER: %d\n", blocks_to_be_used);
+//     // set_used(blocks_to_be_used, &(*dir_entry).data_locations);
+//     // starting_block_index= (*dir_entry).data_locations[0];
+//     return starting_block_index;
+// }

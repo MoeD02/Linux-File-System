@@ -23,7 +23,7 @@
 typedef struct VCB
 {
     unsigned long magic_n;         // Validity of File System
-    unsigned int root;             // Pos of root
+    unsigned int root_index;       // Pos of root
     unsigned int block_size;       // Will be 512
     unsigned int free_blocks;      // Number of free blocks
     unsigned int number_of_blocks; // Total number of blocks in VCB

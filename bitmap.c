@@ -40,23 +40,23 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	//10111111
 	//set_free(5);
 	//1011111
-	int s = 64;
-	int *a = malloc(sizeof(int) * s);
-	set_used(s, a);
-	for (int i = 0; i < s; i++)
-	{
-		//printf("****%d\t%d\n", a[i], i);
-	}
-	bit_set(2, 73);
-	//1111 1111 0010 - 73
-	//1111 1111 0100 - 74
-	set_free(s, a);
+	// int s = 64;
+	// int *a = malloc(sizeof(int) * s);
+	// set_used(s, a);
+	// for (int i = 0; i < s; i++)
+	// {
+	// 	//printf("****%d\t%d\n", a[i], i);
+	// }
+	// bit_set(2, 73);
+	// //1111 1111 0010 - 73
+	// //1111 1111 0100 - 74
+	// set_free(s, a);
 	// for (int i = 0; i < s; i++)
 	// {
 	// 	printf("****%d\t%d\n", a[i], i);
 	// }
 
-	LBAwrite(bitmap, blocks_needed, 1);
+	//LBAwrite(bitmap, blocks_needed, 1);
 	return 1;
 }
 
@@ -79,7 +79,7 @@ int bit_free(int int_index, int bit_index)
 	return 1;
 }
 
-int set_free(int count, int data_locations[])
+int set_free(int count, int *data_locations)
 {
 	
 	if (count <= 0 || count >= vcb_free)
@@ -95,7 +95,7 @@ int set_free(int count, int data_locations[])
 	}
 	return 1;
 }
-int set_used(int count, int data_locations[])
+int set_used(int count, int *data_locations)
 {
 	if (vcb_free - count <= 0)
 		return -1;

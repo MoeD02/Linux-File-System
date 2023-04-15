@@ -48,7 +48,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	init_bitmap(numberOfBlocks, blockSize);
 	init_vcb(numberOfBlocks, blockSize);
 	
-	init_root(blockSize,NULL);
+	vcb->root_index= init_root(blockSize,NULL);
 	LBAwrite(vcb, 1, 0);
 	//LBAwrite(bitmap, vcb->bitmap_total, 1);
 	magic_n = vcb->magic_n;

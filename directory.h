@@ -30,7 +30,7 @@ typedef struct DirectoryEntry
     unsigned int data_locations[MAX_ENTRIES]; // Array containing locations of file
     unsigned int isDirectory;                 // Either File or Directory Entry
     unsigned int size;                        // File Size in Bytes
-    int starting_block_index;                   
+    int starting_block_index;                 // Index at which the directory starts  
     time_t creation_date;                     // When was it Created
     time_t last_access;                       // when it was last accessed
     time_t last_mod;                          // when it was last modified
