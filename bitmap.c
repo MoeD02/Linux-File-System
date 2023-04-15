@@ -49,7 +49,7 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	bit_set(2, 73);
 	//1111 1111 0010 - 73
 	//1111 1111 0100 - 74
-	// set_free(s, a);
+	set_free(s, a);
 	// for (int i = 0; i < s; i++)
 	// {
 	// 	printf("****%d\t%d\n", a[i], i);
@@ -80,6 +80,7 @@ int bit_free(int int_index, int bit_index)
 
 int set_free(int count, int data_locations[])
 {
+	
 	if (count <= 0 || count >= vcb_free)
 		return -1;
 	int index;
