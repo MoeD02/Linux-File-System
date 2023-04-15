@@ -30,11 +30,11 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	bitmap->bitmap = (int *)(bitmap + 1);
 	vcb_free = numberOfBlocks;
 	printf("%d\t%d\n", bytes_needed, blocks_needed);
-	for (int i = 0; i < 8; i++)
-	{
-		bit_set(i);
-	}
-	bit_set(8);
+	// for (int i = 0; i < 8; i++)
+	// {
+	// 	bit_set(0, i);
+	// }
+	//bit_set(0, 8);
 	//set_free(11);
 	//10111111
 	//set_free(5);
@@ -46,6 +46,9 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	{
 		printf("****%d\t%d\n", a[i], i);
 	}
+	bit_set(2, 73);
+	//1111 1111 0010 - 73
+	//1111 1111 0100 - 74
 	// set_free(s, a);
 	// for (int i = 0; i < s; i++)
 	// {
@@ -56,27 +59,22 @@ int init_bitmap(int numberOfBlocks, int blockSize)
 	return 1;
 }
 
-int bit_set(int bit_index)
+int bit_set(int int_index, int bit_index)
 {
-	// error: block_number is out of bounds
+	// error: int_index is out of bounds
 	if (bit_index < 0 || bit_index > vcb_free)
 		return -1;
-	int int_offset = bit_index / 32;
-	int bit_offset = bit_index % 32;
 
-	bitmap->bitmap[int_offset] |= (1 << bit_offset);
+	bitmap->bitmap[int_index] |= (1 << bit_index);
 	return 1;
 }
 
-int bit_free(int bit_index)
+int bit_free(int int_index, int bit_index)
 {
-	// error: block_number is out of bounds
+	// error: int_index is out of bounds
 	if (bit_index < 0 || bit_index > vcb_free)
 		return -1;
-	int int_offset = bit_index / 32;
-	int bit_offset = bit_index % 32;
-
-	bitmap->bitmap[int_offset] &= ~(1 << bit_offset);
+	bitmap->bitmap[int_index] &= ~(1 << bit_index);
 	return 1;
 }
 
@@ -90,7 +88,7 @@ int set_free(int count, int data_locations[])
 	{
 		index = data_locations[k];
 		data_locations[k] = 0;
-		bit_free(index);
+		bit_free(i, index);
 		k++;
 	}
 	return 1;
@@ -110,16 +108,31 @@ int set_used(int count, int data_locations[])
 			int mask = 1 << j;
 			if ((bitmap->bitmap[i] & mask) == 0) // if bit is 0, block is free
 			{
-				index = i * 32 + j; // index of free block
+				index = i * 32 + j % 32; // index of free block
 				//printf("***%d\n", k);
 				data_locations[k] = index;
-				bit_set(index);
+				printf("%d\n", index);
+				bit_set(i, index);
 				k++;
 				if (k == count)
 					return 1;
 			}
 		}
 	}
+}
+int get_next_free()
+{
+	int int_total = (bytes_needed + 31) / 32;
+	for (int i = 0; i < int_total; i++)
+	{
+		int int_index = i / 32;
+		int bit_index = i % 32;
+		if ((bitmap->bitmap[int_index] & (1 << bit_index)) == 0)
+		{
+			return i;
+		}
+	}
+	return -1;
 }
 
 // void test_bitmap(VCBT *vcb, BitMap *bitmap)

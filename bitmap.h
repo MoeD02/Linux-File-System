@@ -20,11 +20,13 @@ in bitmap
 */
 /////////////
 /////////////
-int bit_set(int bit_index);	// Sets a block as used. Returns 1 if secccess.
-int bit_free(int bit_index); //Sets a block as free. Returns 1 if secccess.
+int bit_set(int int_index, int bit_index);	// Sets a block as used. Returns 1 if secccess.
+int bit_free(int int_index, int bit_index); //Sets a block as free. Returns 1 if secccess.
 
 /* -1 if error. Error causes: arguemnt is larger than toal blocks, or negative input. */
 /////////////
+
+int get_next_free(); // returns index of next free bit
 void test_bitmap();
 
 #endif
