@@ -35,11 +35,6 @@ typedef struct VCB
     unsigned int number_of_blocks; // Total number of blocks in VCB
     unsigned int bitmap_total;     //total number of blocks ocupied by bitmap
 } VCB;
-typedef struct BitMap
-{
-    size_t size;
-    unsigned int bitmap[]; // To keep track of free spaces
-} BitMap;
 
 typedef struct DirectoryEntry
 {                                             //Parent Name
@@ -53,8 +48,5 @@ typedef struct DirectoryEntry
 } DirectoryEntry;
 
 int init_vcb(uint64_t, uint64_t);
-int init_bitmap();
 int init_root(uint64_t);
-int get_next_free();
-void test_bitmap();
 #endif
