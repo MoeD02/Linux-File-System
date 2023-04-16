@@ -11,6 +11,7 @@
 int init_root(uint64_t blockSize, DirectoryEntry *parent){
     printf("INITIALIZING ROOT\n");
     DirectoryEntry *dir_entries;
+    
     int bytes_needed = MAX_ENTRIES * sizeof(DirectoryEntry);
     int blocks_needed = (bytes_needed + blockSize - 1) / blockSize;
     
@@ -19,11 +20,14 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
     printf("BYTES NEEEDED %d\n BLOCKS NEEDED: %d\n BYTES USED: %d\n ACTUAL ENTRY COUNT: %d\n",
     bytes_needed, blocks_needed, bytes_used, actual_entry_count);
     dir_entries = malloc (bytes_used);
+    memset(&dir_entries[0], 0, blockSize);
+    memset(&dir_entries[1], 0, blockSize);
     for(int i=2; i<actual_entry_count; i++){
-        //dir_entries[i].name[0]= '\0'; 
-        strcpy(dir_entries[i].name,"..");
+        memset(&dir_entries[i], 0, blockSize);
+        dir_entries[i].name[0]= '\0'; 
+        
         for(int j=0; j<actual_entry_count; j++){
-            dir_entries[i].data_locations[j]=1;
+            dir_entries[i].data_locations[j]=0;
         }
     }
     //Assigning root variables
