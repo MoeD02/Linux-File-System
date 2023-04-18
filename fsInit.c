@@ -52,6 +52,9 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	LBAwrite(vcb, 1, 0);
 	//LBAwrite(bitmap, vcb->bitmap_total, 1);
 	magic_n = vcb->magic_n;
+
+	//parse_path("/path/to/file");
+
 	free(vcb);
 	return magic_n;
 }
