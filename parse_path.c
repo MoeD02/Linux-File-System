@@ -11,55 +11,80 @@
 * Description: This file contains the parse path function
 *
 **************************************************************/
+#include "parse_path.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include "parse_path.h"
-
-char **parse_path(char *filePath){
+#include "fs_structs.h"
+#include "directory.h"
+#include "fsLow.h"
+char **parse_path(char *filePath, void* entry){
+    Path* container = malloc(sizeof(Path));
+    DirectoryEntry* temp_directory = malloc (sizeof(DirectoryEntry));
+    DirectoryEntry* dir_entry = (DirectoryEntry*) entry;
+    //dir_entry[i]->name
     char **path=NULL;
     int number_of_words=0;
     char* temp_buffer=NULL;
     temp_buffer = strdup(filePath);
     char *token = strtok(temp_buffer, "/");
     while(token != NULL){
-
         number_of_words++;
         path = realloc( path, number_of_words * sizeof(char *));
-        //strcpy(path[number_of_words-1], token);
         path[number_of_words-1] = strdup(token);
-        token = strtok(NULL,"/");
+        for(int i=0; i<MAX_ENTRIES; i++){
+            //if match, load next directory
+            LBAread(temp_directory,1, dir_entry->data_locations[i]);
+            if(strcmp(token, temp_directory->name)==0){
+                LBAread(dir_entry, 1, dir_entry->data_locations[i]); //  /Downloads/Diego
+                if(dir_entry->isDirectory!=1){
+                    
+                }
+            }
+
+        }     
+       token = strtok(NULL,"/");
+        
     }
-    //Adding NULL terminator at the end of array
     number_of_words++;
     path = realloc(path, number_of_words * sizeof(char *));
     path[number_of_words - 1] = NULL;
-    printf("PATH: %s\n", path[1]);
+    printf("PATH: %s\n", path[0]);
+
+    // /downloads/Diego 
     return path;
-
-
-//     char path[120]; //filePath buffer
-//     char delimiter[] = "/";
+}
+    
+    
+    //Adding NULL terminator at the end of array
+    
+    // go to root
+    //go through the entries in root
+    //USE LBA READ
+    // find download
+    // make sure its a directory
+    // mamake sure it contains diego
+    //take directory entries array
+    //loop through it and make sure the path is correct
     
 
-//     strcpy(path, filePath);
-
-//     char *token = strtok(path, delimiter);
-//     char full_path[120] = ""; //buffer for full path
-
-
-// while (token != NULL) {
-        
-//         // Concatenate the token with the delimiter to construct the full path
-//         strcat(full_path, token);
-//         strcat(full_path, delimiter);
-        
-//         token = strtok(NULL, delimiter); //get next token
-
-//         if(token == NULL){
-//             printf("No path\n");
-//         }
-//     }
+    // root/downloads/Diego
+    // dir entries array
+    // {Diego, root, moe, kemi, blah , dabidi, boo} 
+    // parent: downloads
+    
 
 
-//     printf("Full Path: %s\n", full_path);
-}
+    //Find starting index of downloads 50
+    //go to root
+    //loop through data locations to find downloads
+    //done
+    //check if downloads is a directory
+    // if it is continue
+    // if not throw error
+    // 
+
+
+

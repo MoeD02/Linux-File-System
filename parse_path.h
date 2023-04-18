@@ -10,12 +10,18 @@
 *
 * Description: Contains parse_path function prototype
 **************************************************************/
-#ifndef PARSE_PATH_H
-#define PARSE_PATH_H
-#include <string.h>
-#include <stdlib.h>
+#ifndef PARSE_PATH
+#define PARSE_PATH .H
 
-char **parse_path(char *file_path);
+
+
+
+typedef struct Path{
+    void * dir_entry;
+    int index;
+}Path;
+
+char **parse_path(char *file_path, void* );
 
 
 #endif

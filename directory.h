@@ -18,12 +18,14 @@
 #define DIRECTORY .H
 #include <stdio.h>
 #include <time.h>
+#include "mfs.h"
 #define MAX_ENTRIES 50
 #define UNUSED 0
 // #define USED 1
 #define TRUE 1
 #define FALSE 0
 #define MAGIC_NUMBER 0x4261686100000000
+
 typedef struct DirectoryEntry
 {                                             //Parent Name
     char name[272];                           // File Name
@@ -35,6 +37,6 @@ typedef struct DirectoryEntry
     time_t last_access;                       // when it was last accessed
     time_t last_mod;                          // when it was last modified
 } DirectoryEntry;
-int init_root(uint64_t, DirectoryEntry*);
+int init_root(uint64_t, DirectoryEntry *);
 int assign_locations(DirectoryEntry *dir_entry, int);
 #endif

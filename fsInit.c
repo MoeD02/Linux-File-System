@@ -54,7 +54,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	//LBAwrite(bitmap, vcb->bitmap_total, 1);
 	magic_n = vcb->magic_n;
 
-	parse_path("/path/to/file");
+	parse_path("/Downloads/Diego",NULL);
 
 	free(vcb);
 	return magic_n;

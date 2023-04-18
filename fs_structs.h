@@ -19,6 +19,7 @@
 #define FS_STRUCTS .H
 #include <stdio.h>
 #include <time.h>
+#include "mfs.h"
 // Needs to take only 1 block
 typedef struct VCB
 {
