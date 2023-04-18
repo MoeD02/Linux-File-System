@@ -26,6 +26,7 @@
 #include "bitmap.h"
 
 #include "directory.h"
+#include "parse_path.h"
 VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
@@ -53,7 +54,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	//LBAwrite(bitmap, vcb->bitmap_total, 1);
 	magic_n = vcb->magic_n;
 
-	//parse_path("/path/to/file");
+	parse_path("/path/to/file");
 
 	free(vcb);
 	return magic_n;

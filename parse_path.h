@@ -12,9 +12,10 @@
 **************************************************************/
 #ifndef PARSE_PATH_H
 #define PARSE_PATH_H
+#include <string.h>
+#include <stdlib.h>
 
-
-void parse_path(char *file_path);
+char **parse_path(char *file_path);
 
 
 #endif

@@ -15,31 +15,51 @@
 #include <string.h>
 #include "parse_path.h"
 
-void parse_path(char *filePath){
+char **parse_path(char *filePath){
+    char **path=NULL;
+    int number_of_words=0;
+    char* temp_buffer=NULL;
+    temp_buffer = strdup(filePath);
+    char *token = strtok(temp_buffer, "/");
+    while(token != NULL){
 
-    char path[120]; //filePath buffer
-    char delimiter[] = "/";
+        number_of_words++;
+        path = realloc( path, number_of_words * sizeof(char *));
+        //strcpy(path[number_of_words-1], token);
+        path[number_of_words-1] = strdup(token);
+        token = strtok(NULL,"/");
+    }
+    //Adding NULL terminator at the end of array
+    number_of_words++;
+    path = realloc(path, number_of_words * sizeof(char *));
+    path[number_of_words - 1] = NULL;
+    printf("PATH: %s\n", path[1]);
+    return path;
+
+
+//     char path[120]; //filePath buffer
+//     char delimiter[] = "/";
     
 
-    strcpy(path, filePath);
+//     strcpy(path, filePath);
 
-    char *token = strtok(path, delimiter);
-    char full_path[120] = ""; //buffer for full path
+//     char *token = strtok(path, delimiter);
+//     char full_path[120] = ""; //buffer for full path
 
 
-while (token != NULL) {
+// while (token != NULL) {
         
-        // Concatenate the token with the delimiter to construct the full path
-        strcat(full_path, token);
-        strcat(full_path, delimiter);
+//         // Concatenate the token with the delimiter to construct the full path
+//         strcat(full_path, token);
+//         strcat(full_path, delimiter);
         
-        token = strtok(NULL, delimiter); //get next token
+//         token = strtok(NULL, delimiter); //get next token
 
-        if(token == NULL){
-            printf("No path\n");
-        }
-    }
+//         if(token == NULL){
+//             printf("No path\n");
+//         }
+//     }
 
 
-    printf("Full Path: %s\n", full_path);
+//     printf("Full Path: %s\n", full_path);
 }
