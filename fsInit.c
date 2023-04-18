@@ -31,8 +31,12 @@ VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 
+	DirectoryEntry *downloads = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *root = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *file = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *dummy = malloc(sizeof(DirectoryEntry));
 	printf("Initializing File System with %ld blocks with a block size of %ld\n",
-		   numberOfBlocks, blockSize);
+		numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
 	vcb = malloc(blockSize);
 	int magic_n;
@@ -48,14 +52,26 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	}
 	init_bitmap(numberOfBlocks, blockSize);
 	init_vcb(numberOfBlocks, blockSize);
-
+	
 	vcb->root_index = init_root(blockSize, NULL);
+	LBAread(root, 1, vcb->root_index);
+	downloads->isDirectory = FALSE;
+	file->isDirectory = FALSE; // file
+	strcpy(downloads->name,"downloads");
+	strcpy(file->name,"file");
+	// 6...55 marked as root
+	int k = 56;
+	for(int i =0; i < MAX_ENTRIES; i++){
+		downloads->data_locations[i] = k;
+		k++;
+	}
+	LBAwrite(downloads, 1, vcb->root_index+3); // root, parent, downloads
+	LBAwrite(file, 1, 57);
 	LBAwrite(vcb, 1, 0);
-	//LBAwrite(bitmap, vcb->bitmap_total, 1);
+	//LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
-
-	parse_path("/Downloads/Diego",NULL);
-
+	parse_path("/",root);
+	printf("should print: name: downloads, j: -1\n");
 	free(vcb);
 	return magic_n;
 }

@@ -21,7 +21,7 @@ typedef struct Path{
     int index;
 }Path;
 
-char **parse_path(char *file_path, void* );
+Path* parse_path(char *file_path, void* );
 
 
 #endif
