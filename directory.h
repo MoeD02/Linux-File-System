@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "mfs.h"
-#define MAX_ENTRIES 50
+#define MAX_ENTRIES 100
 #define UNUSED 0
 // #define USED 1
 #define TRUE 1
@@ -27,16 +27,22 @@
 #define MAGIC_NUMBER 0x4261686100000000
 
 typedef struct DirectoryEntry
-{                                             //Parent Name
-    char name[272];                           // File Name
-    unsigned int data_locations[MAX_ENTRIES]; // Array containing locations of file
-    unsigned int isDirectory;                 // Either File or Directory Entry
-    unsigned int size;                        // File Size in Bytes
-    int starting_block_index;                 // Index at which the directory starts  
-    time_t creation_date;                     // When was it Created
-    time_t last_access;                       // when it was last accessed
-    time_t last_mod;                          // when it was last modified
+{                                             
+    char name[272];                             // File Name
+    unsigned short data_locations[MAX_ENTRIES]; // Array containing locations of file
+    unsigned int isDirectory;                   // Either File or Directory Entry
+    unsigned int size;                          // File Size in Bytes
+    unsigned short data_locations_left;                   
+    time_t creation_date;                       // When was it Created
+    time_t last_access;                         // when it was last accessed
+    time_t last_mod;                            // when it was last modified
 } DirectoryEntry;
+
+typedef struct extended
+{
+    unsigned short data_locations[MAX_ENTRIES];
+
+}extended;
 int init_root(uint64_t, DirectoryEntry *);
-int assign_locations(DirectoryEntry *dir_entry, int);
+
 #endif

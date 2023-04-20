@@ -33,4 +33,5 @@ typedef struct VCB
 
 int init_vcb(uint64_t, uint64_t);
 void test_bitmap();
+int check_full(int);
 #endif

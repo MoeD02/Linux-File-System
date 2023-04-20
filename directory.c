@@ -8,6 +8,7 @@
 #include "mfs.h"
 #include "directory.h"
 #include "bitmap.h"
+
 int init_root(uint64_t blockSize, DirectoryEntry *parent){
     printf("INITIALIZING ROOT\n");
     DirectoryEntry *dir_entries;
@@ -38,7 +39,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
     dir_entries[0].isDirectory = TRUE;
     dir_entries[0].size = bytes_needed;
     set_used(blocks_needed,(dir_entries[0].data_locations));
-    dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
+    //dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
 
     if(parent == NULL){
         strcpy(dir_entries[1].name,"..");
@@ -65,8 +66,12 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent){
     for(int i=0; i<MAX_ENTRIES; i++){
         printf("%d\n", dir_entries[0].data_locations[i]);
     }
-    LBAwrite(dir_entries, blocks_needed, dir_entries[0].starting_block_index);
+    LBAwrite(dir_entries, blocks_needed, dir_entries[0].data_locations[0]);
     printf("\nBYTES MALLOCED : %d\n", bytes_used);
 
-    return dir_entries[0].starting_block_index;
+    return dir_entries[0].data_locations[0];
+}
+
+int check_full(int entries_left){
+    
 }

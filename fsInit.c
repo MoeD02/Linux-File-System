@@ -97,6 +97,12 @@ int init_vcb(uint64_t numberOfBlocks, uint64_t blockSize)
 	return 1;
 }
 
+// int check_full(int something){
+// 	//make root own everything
+	
+// 	return 0;
+// }
+
 // Inits Root and 48 other entries
 
 void exitFileSystem()

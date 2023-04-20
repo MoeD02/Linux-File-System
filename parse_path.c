@@ -40,7 +40,7 @@ Path* parse_path(char *filePath, void* entry){
     if (number_of_words==0){
         printf("EMPTY\n");
         container->dir_entry = dir_entry;
-        container->index = dir_entry->starting_block_index;
+        container->index = dir_entry->data_locations[0];
         //printf("print: name: %s, j: %d\n", dir_entry->name, dir_entry->starting_block_index);
         return container;
     }
