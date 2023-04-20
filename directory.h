@@ -19,7 +19,8 @@
 #include <stdio.h>
 #include <time.h>
 #include "mfs.h"
-#define MAX_ENTRIES 100
+#define MAX_ENTRIES 3 // 100 but last cannot be allocated
+#define EXTENDED_ENTRIES 2
 #define UNUSED 0
 // #define USED 1
 #define TRUE 1
@@ -27,22 +28,35 @@
 #define MAGIC_NUMBER 0x4261686100000000
 
 typedef struct DirectoryEntry
-{                                             
-    char name[272];                             // File Name
-    unsigned short data_locations[MAX_ENTRIES]; // Array containing locations of file
+{
+    char name[272 + 97 + 96];                   // File Name
+    unsigned short data_locations[MAX_ENTRIES]; /* Array containing locations of file.
+                                                 Last item is for next extended table*/
     unsigned int isDirectory;                   // Either File or Directory Entry
     unsigned int size;                          // File Size in Bytes
-    unsigned short data_locations_left;                   
-    time_t creation_date;                       // When was it Created
-    time_t last_access;                         // when it was last accessed
-    time_t last_mod;                            // when it was last modified
+    unsigned short free_entries;                // Available entries
+    //unsigned short flag;
+    time_t creation_date; // When was it Created
+    time_t last_access;   // when it was last accessed
+    time_t last_mod;      // when it was last modified
 } DirectoryEntry;
+// [99] = starting block of extended.
+// When writing, we must write Root, and extended.
+// LBAwrite(root, MAX_ENTIRES, [0]);
+// LBAwrite(extended, EXTENDED_ENTRIES, [99]);
 
-typedef struct extended
+// root is full.
+// ask bitmap for EXTENDED_ENTRIES open spots.
+// Malloc extended, pass in data_locations from extendeds(count, *data_locations)
+//
+typedef struct Extend
 {
-    unsigned short data_locations[MAX_ENTRIES];
+    unsigned short free_entries;
+    unsigned short data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
-}extended;
+} Extend;
+
 int init_root(uint64_t, DirectoryEntry *);
-
+Extend *extend_directory(DirectoryEntry *dir_entry);
+Extend *extend_extend(Extend *extended);
 #endif

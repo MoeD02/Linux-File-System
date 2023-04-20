@@ -1,7 +1,5 @@
 #ifndef BITMAP
 #define BITMAP .H
-#define USED 1
-#define FREE 0
 typedef struct BitMap
 {
 	int *bitmap; // To keep track of free spaces
@@ -11,11 +9,11 @@ int init_bitmap(int, int); //Returns 1 if secccess, -1 if error
 
 /////////////
 
-int set_used(int count, int(*data_locations)); //Returns 1 if secccess, -1 if error
-int set_free(int count, int(*data_locations)); //Returns 1 if secccess, -1 if error
+int set_used(int count, short(*data_locations)); //Returns 1 if secccess, -1 if error
+int set_free(int count, short(*data_locations)); //Returns 1 if secccess, -1 if error
 /* set_used saves the free indexes into data locations and mark blocks as used
 in bitmap
-   set_free sets all indexes in data_locations as 0 and markes blocks as free 
+   set_free sets all indexes in data_locations as 0 and marks blocks as free 
 in bitmap
 */
 /////////////

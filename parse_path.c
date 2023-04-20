@@ -17,27 +17,52 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-#include "fs_structs.h"
+#include "vcb.h"
 #include "directory.h"
 #include "fsLow.h"
-Path* parse_path(char *filePath, void* entry){
-    Path* container = malloc(sizeof(Path));
-    DirectoryEntry* temp_directory = malloc (sizeof(DirectoryEntry));
-    DirectoryEntry* dir_entry = (DirectoryEntry*) entry;
-    char **path=NULL;
-    int number_of_words=0;
-    char* temp_buffer=NULL;
+//free shit
+char **path;
+Path *parse_path(char *filePath, void *entry)
+{
+    Path *container = malloc(sizeof(Path));
+    DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
+    DirectoryEntry *dir_entry = (DirectoryEntry *)entry;
+    path = NULL;
+    int number_of_words = 0;
+    char *temp_buffer = NULL;
     temp_buffer = strdup(filePath);
     char *token = strtok(temp_buffer, "/");
-    
-    while(token != NULL){
+
+    while (token != NULL)
+    {
         number_of_words++;
-        path = realloc( path, number_of_words * sizeof(char *));
-        path[number_of_words-1] = strdup(token);
-        token = strtok(NULL,"/");
-        
+        path = realloc(path, number_of_words * sizeof(char *));
+        path[number_of_words - 1] = strdup(token);
+        token = strtok(NULL, "/");
     }
-    if (number_of_words==0){
+
+    /*
+    while(number_of_words){ 
+        
+        do{ 
+            int free = dir_entry->free_entries; 
+            
+            // extends exist
+            // loop through data locations and look for dir
+            // loop through extended and look for dir
+            
+        
+            // update free on each extend table
+            // free != 1 means this is last extend table
+            // if found LBA block
+            
+        }while(free == 1)
+    number_of_words--;
+    }
+    */
+
+    if (number_of_words == 0)
+    {
         printf("EMPTY\n");
         container->dir_entry = dir_entry;
         container->index = dir_entry->data_locations[0];
@@ -46,37 +71,37 @@ Path* parse_path(char *filePath, void* entry){
     }
 
     //THIS IS HITTING EVERYTHING BEFORE LAST ITEM
-    for(int i=0; i<number_of_words-1; i++){
-        
-        for(int j=0; j<MAX_ENTRIES; j++){
+    for (int i = 0; i < number_of_words - 1; i++)
+    {
+
+        for (int j = 0; j < MAX_ENTRIES; j++)
+        {
             //if match, load next directory
-            LBAread(temp_directory,1, dir_entry->data_locations[j]); 
-            if(strcmp(path[i], temp_directory->name)==0){ //temp: Downloads    
+            LBAread(temp_directory, 1, dir_entry->data_locations[j]);
+            if (strcmp(path[i], temp_directory->name) == 0)
+            {                                                        //temp: Downloads
                 LBAread(dir_entry, 1, dir_entry->data_locations[j]); //  dir_entry; Downloads
                 //handle error of invalid path
-                if(dir_entry->isDirectory!=1 && number_of_words>0){
+                if (dir_entry->isDirectory != 1 && number_of_words > 0)
+                {
                     //printf("NULL\n");
                     return NULL;
                 }
-                
-                
             }
-            
-
         }
-        
     }
     //THIS IS HITTING LAST ITEM
-    for(int i=0; i<MAX_ENTRIES;i++){
-        LBAread(temp_directory,1, dir_entry->data_locations[i]); 
+    for (int i = 0; i < MAX_ENTRIES; i++)
+    {
+        LBAread(temp_directory, 1, dir_entry->data_locations[i]);
         // Valid and exists
-        if(strcmp(path[number_of_words-1], temp_directory->name)==0){
+        if (strcmp(path[number_of_words - 1], temp_directory->name) == 0)
+        {
             container->dir_entry = dir_entry;
             container->index = i;
             //printf("should print: name: %s, j: %d\n", dir_entry->name, dir_entry->data_locations[i]);
             return container;
         }
-        
     }
     //Valid and last piece doenst exist
     container->dir_entry = dir_entry;
@@ -88,6 +113,17 @@ Path* parse_path(char *filePath, void* entry){
     path[number_of_words - 1] = NULL;
     //printf("PATH: %s\n", path[0]);
 
-    
     return container;
+}
+
+Path *temp(char *path_piece, void *entry, int data_locations_size,
+           short *data_locations)
+{
+    if (path_piece == NULL)
+    {
+        return;
+    }
+    
+
+    return temp(path_piece, entry, data_locations_size, data_locations);
 }
