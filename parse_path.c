@@ -178,6 +178,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     if (extend->free_entries == 1)
     {
         //free(extend);
+        //change
         printf("@@@@HERE\n");
         printf("@@@START:%d\n", extend->data_locations[2]);
         //                               starting block of the next extend table
