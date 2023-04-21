@@ -22,9 +22,10 @@
 #include "fsLow.h"
 //free shit
 char **path;
+Path *container;
 Path *parse_path(char *filePath, void *entry)
 {
-    Path *container = malloc(sizeof(Path));
+    container = malloc(sizeof(Path));
     DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
     DirectoryEntry *dir_entry = (DirectoryEntry *)entry;
     path = NULL;
@@ -41,7 +42,7 @@ Path *parse_path(char *filePath, void *entry)
         token = strtok(NULL, "/");
     }
     // temp(path[0], dir_entry, MAX_ENTRIES, dir_entry->data_locations);
-    /*
+    /*extended->data_locations[EXTENDED_ENTRIES - 1]
     while(number_of_words){ 
         
         do{ 
@@ -75,6 +76,7 @@ Path *parse_path(char *filePath, void *entry)
     {
         for (int j = 0; j < MAX_ENTRIES; j++)
         {
+            printf("WHAT We are READING: %d\nPATH RN: %s\n",dir_entry->data_locations[j],path[i]);
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
             //if match, load next directory
             if (strcmp(path[i], temp_directory->name) == 0)
@@ -96,6 +98,7 @@ Path *parse_path(char *filePath, void *entry)
             {
                 printf("!!!!!!!NULL\n");
                 printf("!!!!!!!BLOCK:%d\n", dir_entry->data_locations[MAX_ENTRIES - 1]);
+                
                 temp_directory = check_extends(dir_entry->name,
                                                dir_entry->data_locations[MAX_ENTRIES - 1],
                                                path[i]);
@@ -144,7 +147,7 @@ Path *parse_path(char *filePath, void *entry)
     path = realloc(path, number_of_words * sizeof(char *));
     path[number_of_words - 1] = NULL;
     //printf("PATH: %s\n", path[0]);
-
+    
     return container;
 }
 // we get all free blocks inside extended [0..128]
@@ -160,17 +163,25 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     Extend *extend = malloc(sizeof(Extend));
     printf("!!!!!!!STARTING BLOCK:%d\n", starting_block);
     LBAread(extend, 1, starting_block);
+    
     printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
-
+    printf("!!!!!! HOW MANY FREE ENTRIES LEFT IN EXTENDED: %d\n",extend->free_entries);
+    //extend->free_entries--;
     DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
-    for (size_t i = 1; i <= EXTENDED_ENTRIES - 1; i++)
+    //CHANGED THIS FROM <= to <
+    for (size_t i = 1; i < EXTENDED_ENTRIES - 1; i++)
     {
+        //two issues 1 is its looping twice
+        //figure this out
         LBAread(temp_entry, 1, extend->data_locations[i]);
-        printf("!!!!!!!NAME:%s\n", temp_entry->name);
+        printf("!!!!!!!temp NAME:%s\n", temp_entry->name);
         //if match, load next directory
         if (strcmp(piece, temp_entry->name) == 0)
         {
             //LBAread(temp_entry, 1, temp_entry->data_locations[i]);
+            container->dir_entry= temp_entry;
+            container->index= extend->data_locations[i];
+            printf("\n*********\nCONTENTS OF CONTAINER: \nDIRECTORY NAME: %s\nINDEX: %d\n*********\n", temp_entry->name, container->index);
             return temp_entry;
         }
     }

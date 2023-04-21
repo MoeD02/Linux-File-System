@@ -52,7 +52,7 @@ typedef struct DirectoryEntry
 typedef struct Extend
 {
     unsigned short free_entries;
-    char garbage[272 + 184 + 44];
+    char garbage[272 + 184 + 42];
     unsigned int data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
 } Extend;

@@ -79,7 +79,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	printf("should print: name: downloads, j: -1\n");
 	fs_mkdir("doesnt matter", 2);
 	LBAread(root, 1, vcb->root_index);
-	parse_path("/pics", root);
+	parse_path("/Moe", root);
 	free(vcb);
 	return magic_n;
 }
