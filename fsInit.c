@@ -33,7 +33,7 @@ VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 
-	DirectoryEntry *downloads = malloc(sizeof(DirectoryEntry));
+	// DirectoryEntry *downloads = malloc(sizeof(DirectoryEntry));
 	DirectoryEntry *root = malloc(sizeof(DirectoryEntry));
 	// DirectoryEntry *file = malloc(sizeof(DirectoryEntry));
 	// DirectoryEntry *dummy = malloc(sizeof(DirectoryEntry));
@@ -57,34 +57,35 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 
 	vcb->root_index = init_root(blockSize, NULL);
 	LBAread(root, 1, vcb->root_index);
-	downloads->isDirectory = TRUE;
-	//file->isDirectory = FALSE; // file
-	strcpy(downloads->name, "downloads");
-	//strcpy(file->name, "file");
-	// 6...55 marked as root
+	// downloads->isDirectory = TRUE;
+	//  file->isDirectory = FALSE; // file
+	// strcpy(downloads->name, "downloads");
+	//  strcpy(file->name, "file");
+	//   6...55 marked as root
 	int k = 56;
-	for (int i = 0; i < MAX_ENTRIES; i++)
-	{
-		downloads->data_locations[i] = k;
-		k++;
-	}
-	root->free_entries--;
-	printf("*****%d\n", root->free_entries);
-	LBAwrite(downloads, 1, vcb->root_index + 2); // root, parent, downloads  || extends
-	//LBAwrite(file, 1, 57);
+	// for (int i = 0; i < MAX_ENTRIES; i++)
+	// {
+	// 	downloads->data_locations[i] = k;
+	// 	k++;
+	// }
+	// root->free_entries--;
+	// printf("*****%d\n", root->free_entries);
+	// LBAwrite(downloads, 1, vcb->root_index + 2); // root, parent, downloads  || extends
+	// LBAwrite(file, 1, 57);
 	LBAwrite(vcb, 1, 0);
 	LBAwrite(root, 1, 6);
-	//LBAwrite(dummy, 1, 57);
+	// LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
 	printf("should print: name: downloads, j: -1\n");
 	fs_mkdir("doesnt matter", 2);
+	fs_mkdir("doesnt matter", 2);
 	LBAread(root, 1, vcb->root_index);
-	parse_path("/Moe", root);
+	// parse_path("/Moe", root);
 	free(vcb);
 	return magic_n;
 }
 
-//Inits the VCB
+// Inits the VCB
 int init_vcb(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 	printf("INITIALIZING VCB\n");

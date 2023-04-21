@@ -1,19 +1,19 @@
 /**************************************************************
-* Class:  CSC-415-02 Fall 2021
-* Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
-* Student IDs:	920372463, 921140633, 921246050
-* GitHub Name: DiegoF001
-* Group Name: The Baha Blast
-* Project: Basic File System
-*
-* File: fs_structs.h
-*
-* Description: This file contains the structs for our VCB,
-*               Bitmap, and Directory Entries, as well as some
-*               additonal information that the initialization
-*               of file system needs.
-*
-**************************************************************/
+ * Class:  CSC-415-02 Fall 2021
+ * Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
+ * Student IDs:	920372463, 921140633, 921246050
+ * GitHub Name: DiegoF001
+ * Group Name: The Baha Blast
+ * Project: Basic File System
+ *
+ * File: fs_structs.h
+ *
+ * Description: This file contains the structs for our VCB,
+ *               Bitmap, and Directory Entries, as well as some
+ *               additonal information that the initialization
+ *               of file system needs.
+ *
+ **************************************************************/
 #ifndef DIRECTORY
 #define DIRECTORY .H
 #include <stdio.h>
@@ -29,13 +29,14 @@
 
 typedef struct DirectoryEntry
 {
-    char name[272 + 184];                     // File Name
+    char name[272 + 182];                     // File Name
     unsigned int data_locations[MAX_ENTRIES]; /* Array containing locations of file.
                                                  Last item is for next extended table*/
     unsigned int isDirectory;                 // Either File or Directory Entry
     unsigned int size;                        // File Size in Bytes
     unsigned short free_entries;              // Available entries
-    //unsigned short flag;
+    // unsigned short flag;
+    unsigned short extended;
     time_t creation_date; // When was it Created
     time_t last_access;   // when it was last accessed
     time_t last_mod;      // when it was last modified
@@ -51,13 +52,21 @@ typedef struct DirectoryEntry
 //
 typedef struct Extend
 {
+    unsigned short extended;
     unsigned short free_entries;
-    char garbage[272 + 184 + 42];
+    char garbage[272 + 184 + 40];
     unsigned int data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
 } Extend;
+typedef struct Container
+{
+    DirectoryEntry *dir_entry;
+    int index;
 
+} Container;
 int init_root(uint64_t, DirectoryEntry *);
 Extend *extend_directory(DirectoryEntry *dir_entry);
 Extend *extend_extend(Extend *extended);
+DirectoryEntry *check_extends_mfs(int);
+int find_empty_entry(DirectoryEntry *);
 #endif
