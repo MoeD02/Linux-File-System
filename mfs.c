@@ -11,8 +11,14 @@
 #include "directory.h"
 #include "parse_path.h"
 Container *container;
+int smthn = 0;
+DirectoryEntry *erasor;
+
 int fs_mkdir(const char *pathname, mode_t mode)
 { // parsepath
+	erasor = malloc(sizeof(DirectoryEntry));
+	memset(&erasor, 0, sizeof(DirectoryEntry));
+
 	Extend *extend;
 	Extend *extend_again = malloc(sizeof(Extend));
 	DirectoryEntry *test_extend_extend = malloc(sizeof(DirectoryEntry));
@@ -30,19 +36,26 @@ int fs_mkdir(const char *pathname, mode_t mode)
 		//
 		// . , .. , downloads || dummy || pics
 		// 0:6 , 1:7 , 2:8 , 3:9 -> extends -> [10, 11 , 12] -> 12 -> extend_extend[13,14,15];
-		int smthn1 = 0;
+
 		printf("STATUS OF EXTENSION: %d\n", root->extended);
+		for (int i = 0; i < 5; i++)
+		{
+			if (root->free_entries == 1)
+			{
+				break;
+			}
+			strcpy(test1->name, "Diego");
+			smthn = find_empty_entry(root);
+			LBAwrite(root, 1, 6);
 
-		extend = extend_directory(root);
-		strcpy(test1->name, "Diego");
-		smthn1 = find_empty_entry(root);
-		LBAwrite(root, 1, 6);
+			printf("*********THE BLOCK IM WRITING TO: %d\n", smthn);
+			LBAwrite(test1, 1, smthn);
+			LBAwrite(extend, 1, extend->data_locations[0]);
+		}
+		// extend = extend_directory(root);
 
-		printf("THE BLOCK IM WRITING TO: %d\n", smthn1);
-		LBAwrite(test1, 1, smthn1);
 		// extend->free_entries--;
 
-		LBAwrite(extend, 1, extend->data_locations[0]);
 		// printf("CHECKING FOR 12: %d", extend->data_locations[2]);
 		// for (int i = 0; i < MAX_ENTRIES; i++)
 		// {
@@ -53,28 +66,39 @@ int fs_mkdir(const char *pathname, mode_t mode)
 		// printf("######%d\n", extend->data_locations[0]);
 		// writing to block 11
 		// LBAwrite(dummy, 1, extend->data_locations[1]);
-		return 1;
 	}
 	else
 	{
-		int smthn = 0;
-		strcpy(test1->name, "Moe");
-		smthn = find_empty_entry(root);
-		printf("THE BLOCK IM WRITING TO: %d\n", smthn);
-		LBAwrite(test1, 1, smthn);
-		LBAwrite(root, 1, 6);
-		int smthn2 = 0;
-		strcpy(test1->name, "NEMO");
-		smthn2 = find_empty_entry(root);
-		printf("THE BLOCK IM WRITING TO: %d\n", smthn2);
-		LBAwrite(test1, 1, smthn2);
-		LBAwrite(root, 1, 6);
+
+		// extend = extend_directory(root);
+
+		for (int i = 0; i < 30; i++)
+		{
+			smthn = find_empty_entry(root);
+			if (smthn == 0)
+			{
+				smthn = find_empty_entry(root);
+			}
+			printf("***************THE BLOCK IM WRITING TO: %d\n", smthn);
+			LBAwrite(test1, 1, smthn);
+			LBAwrite(root, 1, 6);
+		}
+
 		return 1;
 	}
-	// if (root->free_entries == 1)
-	// {
-	// 	LBAread(test, 1, extend->data_locations[1]);
-	// 	printf("*****%s\n", test->name);
+	// 8
+	// 11
+	// 14
+	// 17
+	// 20
+	// 23
+	// 26
+	// 29
+	// 32
+	//  if (root->free_entries == 1)
+	//  {
+	//  	LBAread(test, 1, extend->data_locations[1]);
+	//  	printf("*****%s\n", test->name);
 
 	// 	printf("*****EXTEND SPACES: %d\n", extend->free_entries);
 	// }
@@ -121,10 +145,16 @@ Extend *extend_directory(DirectoryEntry *dir_entry)
 	temp->name[0] = 'E';
 	for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
 	{
+		LBAwrite(erasor, 1, extended->data_locations[i]);
+
 		LBAwrite(temp, 1, extended->data_locations[i]);
 	}
+	LBAwrite(erasor, 1, dir_entry->data_locations[0]);
+
 	LBAwrite(dir_entry, 1, dir_entry->data_locations[0]);
 	extended->extended = FALSE;
+	LBAwrite(erasor, 1, extended->data_locations[0]);
+
 	LBAwrite(extended, 1, extended->data_locations[0]);
 	free(temp);
 	return extended;
@@ -140,14 +170,19 @@ Extend *extend_extend(Extend *extended)
 	set_used(EXTENDED_ENTRIES, ext->data_locations);
 	extended->data_locations[EXTENDED_ENTRIES - 1] = ext->data_locations[0];
 	ext->free_entries = EXTENDED_ENTRIES - 1;
+	LBAwrite(erasor, 1, extended->data_locations[0]); // update not necessary
 
 	LBAwrite(extended, 1, extended->data_locations[0]); // update not necessary
 	temp->name[0] = 'E';
 	for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
 	{
 		// memset(&temp, 0, sizeof(temp));
+		LBAwrite(erasor, 1, ext->data_locations[i]);
+
 		LBAwrite(temp, 1, ext->data_locations[i]);
 	}
+	LBAwrite(erasor, 1, ext->data_locations[0]);
+
 	LBAwrite(ext, 1, ext->data_locations[0]);
 	LBAread(temp, 1, ext->data_locations[1]);
 	printf("TEST PRINTING NAME: %s\n", temp->name);
@@ -160,7 +195,6 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 {
 	container = malloc(sizeof(Container));
 	DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
-
 	for (int i = 0; i < MAX_ENTRIES; i++)
 	{
 		printf("WHAT We are READING: %d\n", dir_entry->data_locations[i]);
@@ -171,6 +205,8 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 		{
 			printf("HERE!!!!!!1\n");
 			dir_entry->free_entries--;
+			LBAwrite(erasor, 1, dir_entry->data_locations[0]);
+
 			LBAwrite(dir_entry, 1, dir_entry->data_locations[0]);
 			return dir_entry->data_locations[i];
 		}
@@ -191,6 +227,7 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 
 			if (temp == NULL)
 			{
+				printf("HITS NULL\n");
 				return 0;
 			}
 			else
@@ -204,7 +241,8 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 			printf("!!!!!!!HIT FALSE\n");
 
 			Extend *extend = malloc(sizeof(Extend));
-			extend = extend_directory(temp);
+			extend = extend_directory(dir_entry);
+			return 0;
 		}
 	}
 }
@@ -232,6 +270,8 @@ DirectoryEntry *check_extends_mfs(int starting_block)
 			printf("FOUND IN ONE OF THE EXTENDS and the block is %d\n", extend->data_locations[i]);
 			// LBAread(temp_entry, 1, temp_entry->data_locations[i]);
 			extend->free_entries--;
+			LBAwrite(erasor, 1, extend->data_locations[0]);
+
 			LBAwrite(extend, 1, extend->data_locations[0]);
 			container->dir_entry = temp;
 			container->index = extend->data_locations[i];
