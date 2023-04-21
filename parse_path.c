@@ -180,6 +180,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
         //free(extend);
         printf("@@@@HERE\n");
         printf("@@@START:%d\n", extend->data_locations[2]);
+        //                               starting block of the next extend table
         temp_entry = check_extends(name, extend->data_locations[EXTENDED_ENTRIES - 1], piece);
     }
     else
