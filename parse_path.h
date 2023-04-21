@@ -12,16 +12,14 @@
 **************************************************************/
 #ifndef PARSE_PATH
 #define PARSE_PATH .H
-
-
-
-
-typedef struct Path{
-    void * dir_entry;
+#include "directory.h"
+typedef struct Path
+{
+    void *dir_entry;
     int index;
-}Path;
+} Path;
 
-Path* parse_path(char *file_path, void* );
-
+Path *parse_path(char *file_path, void *);
+DirectoryEntry *check_extends(char *name, int starting_block, char *piece);
 
 #endif

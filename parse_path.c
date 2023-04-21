@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "vcb.h"
-#include "directory.h"
+//#include "directory.h"
 #include "fsLow.h"
 //free shit
 char **path;
@@ -40,7 +40,7 @@ Path *parse_path(char *filePath, void *entry)
         path[number_of_words - 1] = strdup(token);
         token = strtok(NULL, "/");
     }
-
+    // temp(path[0], dir_entry, MAX_ENTRIES, dir_entry->data_locations);
     /*
     while(number_of_words){ 
         
@@ -69,40 +69,72 @@ Path *parse_path(char *filePath, void *entry)
         //printf("print: name: %s, j: %d\n", dir_entry->name, dir_entry->starting_block_index);
         return container;
     }
-
+    int temp = number_of_words;
     //THIS IS HITTING EVERYTHING BEFORE LAST ITEM
-    for (int i = 0; i < number_of_words - 1; i++)
+    for (int i = 0; i < temp; i++)
     {
-
         for (int j = 0; j < MAX_ENTRIES; j++)
         {
-            //if match, load next directory
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
+            //if match, load next directory
             if (strcmp(path[i], temp_directory->name) == 0)
-            {                                                        //temp: Downloads
-                LBAread(dir_entry, 1, dir_entry->data_locations[j]); //  dir_entry; Downloads
+            {
+                LBAread(dir_entry, 1, dir_entry->data_locations[j]);
                 //handle error of invalid path
                 if (dir_entry->isDirectory != 1 && number_of_words > 0)
                 {
-                    //printf("NULL\n");
+                    printf("NULL\n");
+                    return NULL;
+                }
+                else
+                {
+                    //fill container with found dir
+                }
+            }
+            if (j == MAX_ENTRIES - 1 && dir_entry->free_entries == 1)
+            // check extended same piece // check of extended exists
+            {
+                printf("!!!!!!!NULL\n");
+                printf("!!!!!!!BLOCK:%d\n", dir_entry->data_locations[MAX_ENTRIES - 1]);
+                temp_directory = check_extends(dir_entry->name,
+                                               dir_entry->data_locations[MAX_ENTRIES - 1],
+                                               path[i]);
+                if (temp_directory == NULL)
+                {
                     return NULL;
                 }
             }
         }
+        number_of_words--;
     }
     //THIS IS HITTING LAST ITEM
-    for (int i = 0; i < MAX_ENTRIES; i++)
-    {
-        LBAread(temp_directory, 1, dir_entry->data_locations[i]);
-        // Valid and exists
-        if (strcmp(path[number_of_words - 1], temp_directory->name) == 0)
-        {
-            container->dir_entry = dir_entry;
-            container->index = i;
-            //printf("should print: name: %s, j: %d\n", dir_entry->name, dir_entry->data_locations[i]);
-            return container;
-        }
-    }
+    // for (int i = 0; i < MAX_ENTRIES - 1; i++)
+    // {
+    //     LBAread(temp_directory, 1, dir_entry->data_locations[i]);
+    //     // Valid and exists
+    //     if (strcmp(path[number_of_words - 1], temp_directory->name) == 0)
+    //     {
+    //         container->dir_entry = dir_entry;
+    //         container->index = i;
+    //         //printf("should print: name: %s, j: %d\n", dir_entry->name, dir_entry->data_locations[i]);
+    //         return container;
+    //     }
+    //     if (i == MAX_ENTRIES - 2)
+    //     {
+    //         printf("!!!!!!!NULL\n");
+    //         temp_directory = check_extends(dir_entry->name,
+    //                                        dir_entry->data_locations[MAX_ENTRIES - 1],
+    //                                        path[0]);
+    //         printf("!!!!!!!NULL%s\n", path[0]);
+    //         if (temp_directory == NULL)
+    //         {
+    //             container->dir_entry = dir_entry;
+    //             container->index = -1;
+    //             printf("!!!!!!!NULL%s\n", temp_directory->name);
+    //             return container;
+    //         }
+    //     }
+    // }
     //Valid and last piece doenst exist
     container->dir_entry = dir_entry;
     container->index = -1;
@@ -115,15 +147,45 @@ Path *parse_path(char *filePath, void *entry)
 
     return container;
 }
+// we get all free blocks inside extended [0..128]
+// Directory temp = known free state
+// loop 0-127,
+// write[temp, 1, i];
 
-Path *temp(char *path_piece, void *entry, int data_locations_size,
-           short *data_locations)
+// for other functions
+// read(entry, 1, extended[1])
+// entry->name
+DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
 {
-    if (path_piece == NULL)
-    {
-        return;
-    }
-    
+    Extend *extend = malloc(sizeof(Extend));
+    printf("!!!!!!!STARTING BLOCK:%d\n", starting_block);
+    LBAread(extend, 1, starting_block);
+    printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
 
-    return temp(path_piece, entry, data_locations_size, data_locations);
+    DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
+    for (size_t i = 1; i <= EXTENDED_ENTRIES - 1; i++)
+    {
+        LBAread(temp_entry, 1, extend->data_locations[i]);
+        printf("!!!!!!!NAME:%s\n", temp_entry->name);
+        //if match, load next directory
+        if (strcmp(piece, temp_entry->name) == 0)
+        {
+            //LBAread(temp_entry, 1, temp_entry->data_locations[i]);
+            return temp_entry;
+        }
+    }
+
+    if (extend->free_entries == 1)
+    {
+        //free(extend);
+        printf("@@@@HERE\n");
+        printf("@@@START:%d\n", extend->data_locations[2]);
+        temp_entry = check_extends(name, extend->data_locations[EXTENDED_ENTRIES - 1], piece);
+    }
+    else
+    {
+        printf("ELSE !!!!!!!NULL%s\n", temp_entry->name);
+        //free(extend);
+        return NULL;
+    }
 }

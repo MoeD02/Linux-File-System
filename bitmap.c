@@ -58,7 +58,7 @@ int bit_free(int int_index, int bit_index)
 	return 1;
 }
 
-int set_free(int count, short *data_locations)
+int set_free(int count, int *data_locations)
 {
 	if (count <= 0 || count >= vcb_free)
 		return -1;
@@ -79,7 +79,7 @@ int set_free(int count, short *data_locations)
 	return 1;
 }
 
-int set_used(int count, short *data_locations)
+int set_used(int count, int *data_locations)
 {
 	if (vcb_free - count <= 0)
 		return -1;

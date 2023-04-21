@@ -28,8 +28,6 @@
 #include "directory.h"
 #include "parse_path.h"
 
-
-
 #include "mfs.h"
 VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
@@ -58,8 +56,8 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	init_vcb(numberOfBlocks, blockSize);
 
 	vcb->root_index = init_root(blockSize, NULL);
-	//LBAread(root, 1, vcb->root_index);
-	downloads->isDirectory = FALSE;
+	LBAread(root, 1, vcb->root_index);
+	downloads->isDirectory = TRUE;
 	//file->isDirectory = FALSE; // file
 	strcpy(downloads->name, "downloads");
 	//strcpy(file->name, "file");
@@ -71,14 +69,17 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 		k++;
 	}
 	root->free_entries--;
-	LBAwrite(downloads, 1, vcb->root_index + 3); // root, parent, downloads
+	printf("*****%d\n", root->free_entries);
+	LBAwrite(downloads, 1, vcb->root_index + 2); // root, parent, downloads  || extends
 	//LBAwrite(file, 1, 57);
 	LBAwrite(vcb, 1, 0);
+	LBAwrite(root, 1, 6);
 	//LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
-	//parse_path("/", root);
 	printf("should print: name: downloads, j: -1\n");
 	fs_mkdir("doesnt matter", 2);
+	LBAread(root, 1, vcb->root_index);
+	parse_path("/pics", root);
 	free(vcb);
 	return magic_n;
 }

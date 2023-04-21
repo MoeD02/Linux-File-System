@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <time.h>
 #include "mfs.h"
-#define MAX_ENTRIES 3 // 100 but last cannot be allocated
-#define EXTENDED_ENTRIES 2
+#define MAX_ENTRIES 4 // 100 but last cannot be allocated
+#define EXTENDED_ENTRIES 3
 #define UNUSED 0
 // #define USED 1
 #define TRUE 1
@@ -29,12 +29,12 @@
 
 typedef struct DirectoryEntry
 {
-    char name[272 + 97 + 96];                   // File Name
-    unsigned short data_locations[MAX_ENTRIES]; /* Array containing locations of file.
+    char name[272 + 184];                     // File Name
+    unsigned int data_locations[MAX_ENTRIES]; /* Array containing locations of file.
                                                  Last item is for next extended table*/
-    unsigned int isDirectory;                   // Either File or Directory Entry
-    unsigned int size;                          // File Size in Bytes
-    unsigned short free_entries;                // Available entries
+    unsigned int isDirectory;                 // Either File or Directory Entry
+    unsigned int size;                        // File Size in Bytes
+    unsigned short free_entries;              // Available entries
     //unsigned short flag;
     time_t creation_date; // When was it Created
     time_t last_access;   // when it was last accessed
@@ -52,7 +52,8 @@ typedef struct DirectoryEntry
 typedef struct Extend
 {
     unsigned short free_entries;
-    unsigned short data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
+    char garbage[272 + 184 + 44];
+    unsigned int data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
 } Extend;
 
