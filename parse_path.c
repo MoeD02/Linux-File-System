@@ -33,7 +33,6 @@ Container *parse_path(const char *filePath, void *entry)
     char *temp_buffer = NULL;
     temp_buffer = strdup(filePath);
     char *token = strtok(temp_buffer, "/");
-
     while (token != NULL)
     {
         number_of_words++;
@@ -58,7 +57,6 @@ Container *parse_path(const char *filePath, void *entry)
         {
             printf("WHAT We are READING: %d\nPATH RN: %s\n", dir_entry->data_locations[j], path[i]);
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
-            //
             if (strcmp(path[i], temp_directory->name) == 0)
             {
                 LBAread(dir_entry, 1, dir_entry->data_locations[j]);
@@ -68,8 +66,14 @@ Container *parse_path(const char *filePath, void *entry)
                     printf("NULL\n");
                     return NULL;
                 }
+                if (number_of_words == 1)
+                {
+                    container->dir_entry = dir_entry;
+                    container->index = dir_entry->data_locations[i];
+                    return container;
+                }
             }
-            else if (j == MAX_ENTRIES - 1 && dir_entry->free_entries == 1)
+            else if (j == MAX_ENTRIES - 1 && dir_entry->free_entries == 1 && dir_entry->extended == 1)
             // check extended same piece // check of extended exists
             {
                 printf("!!!!!!!NULL\n");
@@ -78,7 +82,7 @@ Container *parse_path(const char *filePath, void *entry)
                 temp_directory = check_extends(dir_entry->name,
                                                dir_entry->data_locations[MAX_ENTRIES - 1],
                                                path[i]);
-                // EXtended: more path pieces left, and doesnt exist: INVALID
+                // Extended: more path pieces left, and doesnt exist: INVALID
                 if (temp_directory == NULL && number_of_words > 1) // not found in extended,
                 {
                     printf("****INVALID PATH\n");
@@ -86,7 +90,7 @@ Container *parse_path(const char *filePath, void *entry)
                 }
                 // Extended: last piece, and doesnt exist
                 else if (temp_directory == NULL && number_of_words == 1)
-                { //maybe fix
+                {
                     container->dir_entry = dir_entry;
                     container->index = -1;
                     printf("****DOESNT EXIST\n");
@@ -107,18 +111,20 @@ Container *parse_path(const char *filePath, void *entry)
                     return NULL;
                 }
                 // Found and valid, move on to next piece
-                else
+                else if (temp_directory != NULL && strcmp(path[i], temp_directory->name) == 0)
                 {
-                    printf("****FOUND IN EXTENDED\n");
+                    printf("****FOUND IN EXTENDED %s\n", temp_directory->name);
                     LBAread(dir_entry, 1, temp_directory->data_locations[j]);
                 }
             }
         }
+
+        //test [.. , moe]
         number_of_words--;
     }
     container->dir_entry = dir_entry;
     container->index = -1;
-    printf("*******IN ROOT %s\n", dir_entry->name);
+    printf("*******************************NOT FOUND %d\n", container->index);
     return container;
 }
 
@@ -128,17 +134,17 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     printf("!!!!!!!STARTING BLOCK:%d\n", starting_block);
     LBAread(extend, 1, starting_block);
 
-    printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
+    //printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
     printf("!!!!!! HOW MANY FREE ENTRIES LEFT IN EXTENDED: %d\n", extend->free_entries);
     DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
     for (size_t i = 1; i < EXTENDED_ENTRIES - 1; i++)
     {
         LBAread(temp_entry, 1, extend->data_locations[i]);
-        printf("!!!!!!!temp NAME:%s\n", temp_entry->name);
+        //printf("!!!!!!!temp NAME:%s\n", temp_entry->name);
         // if match, load next directory
         if (strcmp(piece, temp_entry->name) == 0)
         {
-            // LBAread(temp_entry, 1, temp_entry->data_locations[i]);
+            //LBAread(temp_entry, 1, extend->data_locations[i]);
             container->dir_entry = temp_entry;
             container->index = extend->data_locations[i];
             printf("\n*********\nCONTENTS OF CONTAINER: \nDIRECTORY NAME: %s\nINDEX: %d\n*********\n", temp_entry->name, container->index);
@@ -150,8 +156,8 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     {
         // free(extend);
         // change
-        printf("@@@@HERE\n");
-        printf("@@@START:%d\n", extend->data_locations[2]);
+        // printf("@@@@HERE\n");
+        // printf("@@@START:%d\n", extend->data_locations[2]);
         //                               starting block of the next extend table
         temp_entry = check_extends(name, extend->data_locations[EXTENDED_ENTRIES - 1], piece);
     }

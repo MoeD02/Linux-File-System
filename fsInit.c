@@ -77,13 +77,14 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
 	printf("should print: name: downloads, j: -1\n");
-	fs_mkdir("/test1", 2);
-	fs_mkdir("/test1/Diego", 2);
-	// fs_mkdir("/test2", 2);
-	// fs_mkdir("/test3", 2);
-	// fs_mkdir("/test4", 2);
+	int test;
 
-	// fs_mkdir("/1", 2);
+	fs_mkdir("/test1", 2);
+	fs_mkdir("/test2", 2);
+	fs_mkdir("/test3", 2);
+	fs_mkdir("/test4", 2);
+
+	fs_mkdir("/1", 2);
 	// fs_mkdir("/2", 2);
 	// fs_mkdir("/3", 2);
 	// fs_mkdir("/4", 2);
@@ -92,7 +93,11 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// fs_mkdir("/7", 2);
 
 	// fs_mkdir("/ex:9", 2);
-	// fs_mkdir("/ex:10", 2);
+	// fs_mkdir("/ex:9/test", 2);
+	// fs_mkdir("/ex:9/test/moe", 2);
+	// test = fs_mkdir("/ex:9/test/moe/diego", 2);
+	//fs_mkdir("/ex:9/moe/diego", 2);
+	//printf("\t\t\t\t%d\n", test);
 	// fs_mkdir("/ex:11", 2);
 	// fs_mkdir("/ex:12", 2);
 	// fs_mkdir("/ex:13", 2);
@@ -106,6 +111,14 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// fs_mkdir("doesnt matter", 2);
 
 	LBAread(root, 1, vcb->root_index);
+
+	DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
+	for (int j = 0; j < MAX_ENTRIES; j++)
+	{
+		LBAread(temp3, 1, root->data_locations[j]);
+		printf("[%s]\n", temp3->name);
+	}
+
 	// parse_path("/Moe", root);
 	free(vcb);
 	return magic_n;
