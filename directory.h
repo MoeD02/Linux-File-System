@@ -59,12 +59,7 @@ typedef struct Extend
     unsigned int data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
 } Extend;
-typedef struct Container
-{
-    DirectoryEntry *dir_entry;
-    int index;
 
-} Container;
 int init_root(uint64_t, DirectoryEntry *);
 Extend *extend_directory(DirectoryEntry *dir_entry);
 Extend *extend_extend(Extend *extended);

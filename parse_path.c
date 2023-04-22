@@ -22,10 +22,10 @@
 #include "fsLow.h"
 // free shit
 char **path;
-Path *container;
-Path *parse_path(char *filePath, void *entry)
+Container *container;
+Container *parse_path(char *filePath, void *entry)
 {
-    container = malloc(sizeof(Path));
+    container = malloc(sizeof(Container));
     DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
     DirectoryEntry *dir_entry = (DirectoryEntry *)entry;
     path = NULL;
@@ -41,26 +41,6 @@ Path *parse_path(char *filePath, void *entry)
         path[number_of_words - 1] = strdup(token);
         token = strtok(NULL, "/");
     }
-    // temp(path[0], dir_entry, MAX_ENTRIES, dir_entry->data_locations);
-    /*extended->data_locations[EXTENDED_ENTRIES - 1]
-    while(number_of_words){
-
-        do{
-            int free = dir_entry->free_entries;
-
-            // extends exist
-            // loop through data locations and look for dir
-            // loop through extended and look for dir
-
-
-            // update free on each extend table
-            // free != 1 means this is last extend table
-            // if found LBA block
-
-        }while(free == 1)
-    number_of_words--;
-    }
-    */
 
     if (number_of_words == 0)
     {
@@ -78,22 +58,18 @@ Path *parse_path(char *filePath, void *entry)
         {
             printf("WHAT We are READING: %d\nPATH RN: %s\n", dir_entry->data_locations[j], path[i]);
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
-            // if match, load next directory
+            //
             if (strcmp(path[i], temp_directory->name) == 0)
             {
                 LBAread(dir_entry, 1, dir_entry->data_locations[j]);
-                // handle error of invalid path
+                // Outer: Is not dectory and is not last piece
                 if (dir_entry->isDirectory != 1 && number_of_words > 0)
                 {
                     printf("NULL\n");
                     return NULL;
                 }
-                else
-                {
-                    // fill container with found dir
-                }
             }
-            if (j == MAX_ENTRIES - 1 && dir_entry->free_entries == 1)
+            else if (j == MAX_ENTRIES - 1 && dir_entry->free_entries == 1)
             // check extended same piece // check of extended exists
             {
                 printf("!!!!!!!NULL\n");
@@ -102,62 +78,61 @@ Path *parse_path(char *filePath, void *entry)
                 temp_directory = check_extends(dir_entry->name,
                                                dir_entry->data_locations[MAX_ENTRIES - 1],
                                                path[i]);
-                if (temp_directory == NULL)
+                // EXtended: more path pieces left, and doesnt exist: INVALID
+                if (temp_directory == NULL && number_of_words > 1) // not found in extended,
                 {
+                    printf("****INVALID PATH\n");
                     return NULL;
+                }
+                // Extended: last piece, and doesnt exist
+                else if (temp_directory == NULL && number_of_words == 1)
+                { //maybe fix
+                    container->dir_entry = dir_entry;
+                    container->index = -1;
+                    printf("****DOESNT EXIST\n");
+                    return container;
+                }
+                //Extended: last piece, and exists
+                else if (temp_directory != NULL && number_of_words == 1)
+                {
+                    container->dir_entry = dir_entry;
+                    container->index = temp_directory->data_locations[0];
+                    printf("****EXISTS\n");
+                    return container;
+                }
+                // Extended: not last piece, and not a directory: INVALID
+                else if (temp_directory != NULL && number_of_words > 1 && dir_entry->isDirectory != 1)
+                {
+                    printf("****INVALID PATH\n");
+                    return NULL;
+                }
+                // Found and valid, move on to next piece
+                else
+                {
+                    printf("****FOUND IN EXTENDED\n");
+                    LBAread(dir_entry, 1, temp_directory->data_locations[j]);
                 }
             }
         }
         number_of_words--;
     }
-    // THIS IS HITTING LAST ITEM
-    //  for (int i = 0; i < MAX_ENTRIES - 1; i++)
-    //  {
-    //      LBAread(temp_directory, 1, dir_entry->data_locations[i]);
-    //      // Valid and exists
-    //      if (strcmp(path[number_of_words - 1], temp_directory->name) == 0)
-    //      {
-    //          container->dir_entry = dir_entry;
-    //          container->index = i;
-    //          //printf("should print: name: %s, j: %d\n", dir_entry->name, dir_entry->data_locations[i]);
-    //          return container;
-    //      }
-    //      if (i == MAX_ENTRIES - 2)
-    //      {
-    //          printf("!!!!!!!NULL\n");
-    //          temp_directory = check_extends(dir_entry->name,
-    //                                         dir_entry->data_locations[MAX_ENTRIES - 1],
-    //                                         path[0]);
-    //          printf("!!!!!!!NULL%s\n", path[0]);
-    //          if (temp_directory == NULL)
-    //          {
-    //              container->dir_entry = dir_entry;
-    //              container->index = -1;
-    //              printf("!!!!!!!NULL%s\n", temp_directory->name);
-    //              return container;
-    //          }
-    //      }
-    //  }
-    // Valid and last piece doenst exist
     container->dir_entry = dir_entry;
     container->index = -1;
-    // printf("should print: name: %s, j: %d\n", dir_entry->name, -1);
-    // Adding NULL terminator at the end of array
-    number_of_words++;
-    path = realloc(path, number_of_words * sizeof(char *));
-    path[number_of_words - 1] = NULL;
-    // printf("PATH: %s\n", path[0]);
+    printf("*******IN ROOT %s\n", dir_entry->name);
+
+    // // Valid and last piece doenst exist
+    // container->dir_entry = dir_entry;
+    // container->index = -1;
+    // // printf("should print: name: %s, j: %d\n", dir_entry->name, -1);
+    // // Adding NULL terminator at the end of array
+    // number_of_words++;
+    // path = realloc(path, number_of_words * sizeof(char *));
+    // path[number_of_words - 1] = NULL;
+    // // printf("PATH: %s\n", path[0]);
 
     return container;
 }
-// we get all free blocks inside extended [0..128]
-// Directory temp = known free state
-// loop 0-127,
-// write[temp, 1, i];
 
-// for other functions
-// read(entry, 1, extended[1])
-// entry->name
 DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
 {
     Extend *extend = malloc(sizeof(Extend));

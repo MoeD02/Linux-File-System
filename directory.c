@@ -28,7 +28,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     for (int i = 2; i < actual_entry_count - 1; i++)
     {
         memset(&dir_entries[i], 0, blockSize);
-        dir_entries[i].name[0] = 'E';
+        dir_entries[i].name[0] = ' ';
         dir_entries[i].extended = FALSE;
 
         for (int j = 0; j < actual_entry_count; j++)

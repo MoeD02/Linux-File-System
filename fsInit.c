@@ -77,8 +77,12 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
 	printf("should print: name: downloads, j: -1\n");
-	fs_mkdir("doesnt matter", 2);
-	fs_mkdir("doesnt matter", 2);
+	fs_mkdir("/test1", 2);
+	fs_mkdir("/test2", 2);
+	fs_mkdir("/test3", 2);
+	fs_mkdir("/test4", 2);
+	fs_mkdir("/test5", 2);
+	//fs_mkdir("doesnt matter", 2);
 	// fs_mkdir("doesnt matter", 2);
 	// fs_mkdir("doesnt matter", 2);
 	// fs_mkdir("doesnt matter", 2);
