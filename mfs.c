@@ -3,7 +3,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "fsLow.h"
 #include "mfs.h"
 #include "vcb.h"
@@ -12,45 +11,60 @@
 #include "parse_path.h"
 Container *container;
 DirectoryEntry *eraser;
-
+DirectoryEntry *root;
+// pics
 int fs_mkdir(const char *pathname, mode_t mode)
-{ // parsepath
+{ // CALL get curr dir
+	root = malloc(sizeof(DirectoryEntry));
+	Container *parse;
 	eraser = malloc(sizeof(DirectoryEntry));
 	memset(&eraser, 0, sizeof(DirectoryEntry));
-	DirectoryEntry *root = malloc(sizeof(DirectoryEntry));
-	DirectoryEntry *dir = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *new_dir = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *empty = malloc(sizeof(DirectoryEntry));
+	DirectoryEntry *parent;
 	LBAread(root, 1, 6);
-	container = parse_path("test", root);
-	// char **path;
-	// int number_of_words = 0;
-	// char *temp_buffer = NULL;
-	// temp_buffer = strdup(pathname);
-	// char *token = strtok(temp_buffer, "/");
-
-	// while (token != NULL)
-	// {
-	// 	number_of_words++;
-	// 	path = realloc(path, number_of_words * sizeof(char *));
-	// 	path[number_of_words - 1] = strdup(token);
-	// 	token = strtok(NULL, "/");
-	// }
-
+	parse = parse_path(pathname, root);
 	int write_to = 0;
 	// Invalid path
-	if (container == NULL)
+	if (parse == NULL)
 		return -1;
 	// Already exists
-	else if (container != NULL && container->index != -1)
+	else if (parse != NULL && parse->index != -1)
 		return -1;
-	// Can be created
-	else if (container && container->index == -1)
+	// Can be created || ADD PARENT
+	else if (parse && parse->index == -1)
 	{
-		strcpy(dir->name, "test");
-		dir->isDirectory = TRUE;
-		//printf("*********ROOT NAME: %s\n", container->dir_entry->name);
-		write_to = find_empty_entry(container->dir_entry);
+		parent = parse->dir_entry;
+		for (int i = 0; i < NAME_LENGTH; i++)
+		{
+			parent->name[i] = '\0';
+		}
+		strcpy(parent->name, "..");
+		strcpy(new_dir->name, parse->name);
+		new_dir->isDirectory = TRUE;
+		set_used(MAX_ENTRIES, new_dir->data_locations);
+		new_dir->size = sizeof(DirectoryEntry);
+		new_dir->creation_date = time(NULL);
+		new_dir->last_access = time(NULL);
+		new_dir->last_mod = time(NULL);
+		new_dir->free_entries = MAX_ENTRIES - 1;
+		empty->name[0] = ' ';
+		for (int i = 1; i < MAX_ENTRIES; i++)
+		{
+			LBAwrite(eraser, 1, new_dir->data_locations[i]);
+			LBAwrite(empty, 1, new_dir->data_locations[i]);
+		}
+		write_to = find_empty_entry(parse->dir_entry);
+		if (write_to == 0)
+		{
+			write_to = find_empty_entry(parse->dir_entry);
+		}
+
 		printf("*******WRITE TO %d\n", write_to);
-		LBAwrite(dir, 1, write_to);
+		LBAwrite(eraser, 1, write_to);
+		LBAwrite(new_dir, 1, write_to);
+		LBAwrite(eraser, 1, new_dir->data_locations[0]);
+		LBAwrite(parent, 1, new_dir->data_locations[0]); // parent
 	}
 	return 1;
 }
@@ -60,9 +74,9 @@ Extend *extend_directory(DirectoryEntry *dir_entry)
 {
 	dir_entry->extended = TRUE;
 	DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
-
 	Extend *extended = malloc(sizeof(Extend)); // 3
 	set_used(EXTENDED_ENTRIES, extended->data_locations);
+
 	// Gives: 10,11,12
 	dir_entry->data_locations[MAX_ENTRIES - 1] = extended->data_locations[0];
 	// EDITED THIS
@@ -118,10 +132,10 @@ Extend *extend_extend(Extend *extended)
 }
 
 int find_empty_entry(DirectoryEntry *dir_entry)
-{
+{ //
 	container = malloc(sizeof(Container));
 	DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
-	for (int i = 0; i < MAX_ENTRIES; i++)
+	for (int i = 1; i < MAX_ENTRIES; i++)
 	{
 		printf("WHAT We are READING: %d\n", dir_entry->data_locations[i]);
 		LBAread(temp, 1, dir_entry->data_locations[i]);
@@ -129,7 +143,7 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 		printf("NAME OF DIRECTORY IM ON: %s\n", temp->name);
 		if (strcmp(" ", temp->name) == 0)
 		{
-			printf("HERE!!!!!!1\n");
+			printf("\t\t\tHERE!!!!!!1\n");
 			dir_entry->free_entries--;
 			LBAwrite(eraser, 1, dir_entry->data_locations[0]);
 
@@ -143,12 +157,7 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 		{
 
 			printf("!!!!!!!HIT TRUE\n");
-			// printf("!!!!!!!BLOCK:%d\n", dir_entry->data_locations[MAX_ENTRIES - 1]);
-			// if (temp->extended == FALSE)
-			// {
-			// 	Extend *extend = malloc(sizeof(Extend));
-			// 	extend = extend_directory(temp);
-			// }
+
 			temp = check_extends_mfs(dir_entry->data_locations[MAX_ENTRIES - 1]);
 
 			if (temp == NULL)
@@ -162,6 +171,7 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 				return container->index;
 			}
 		}
+		// Extend dir_entry if needed
 		else if (i == MAX_ENTRIES - 1 && dir_entry->free_entries == 1 && dir_entry->extended == FALSE)
 		{
 			printf("!!!!!!!HIT FALSE\n");
@@ -222,13 +232,4 @@ DirectoryEntry *check_extends_mfs(int starting_block)
 		temp_extension = extend_extend(extend);
 		temp = check_extends_mfs(extend->data_locations[EXTENDED_ENTRIES - 1]);
 	}
-	// else
-	// {
-	// 	extend = extend_extend(extend);
-
-	// 	LBAread(temp, 1, extend->data_locations[1]);
-	// 	extend->free_entries--;
-	// 	LBAwrite(extend, 1, extend->data_locations[0]);
-	// 	return temp;
-	// }
 }

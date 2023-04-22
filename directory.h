@@ -22,6 +22,7 @@
 #define MAX_ENTRIES 7 // 100 but last cannot be allocated
 #define EXTENDED_ENTRIES 9
 #define UNUSED 0
+#define NAME_LENGTH 446 //272 + 182 - 8
 // #define USED 1
 #define TRUE 1
 #define FALSE 0
@@ -30,7 +31,7 @@
 
 typedef struct DirectoryEntry
 {
-    char name[272 + 182 - 8];                 // File Name
+    char name[NAME_LENGTH];                   // File Name
     unsigned int data_locations[MAX_ENTRIES]; /* Array containing locations of file.
                                                  Last item is for next extended table*/
     unsigned int isDirectory;                 // Either File or Directory Entry

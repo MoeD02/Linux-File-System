@@ -78,10 +78,28 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	magic_n = vcb->magic_n;
 	printf("should print: name: downloads, j: -1\n");
 	fs_mkdir("/test1", 2);
-	fs_mkdir("/test2", 2);
-	fs_mkdir("/test3", 2);
-	fs_mkdir("/test4", 2);
-	fs_mkdir("/test5", 2);
+	fs_mkdir("/test1/Diego", 2);
+	// fs_mkdir("/test2", 2);
+	// fs_mkdir("/test3", 2);
+	// fs_mkdir("/test4", 2);
+
+	// fs_mkdir("/1", 2);
+	// fs_mkdir("/2", 2);
+	// fs_mkdir("/3", 2);
+	// fs_mkdir("/4", 2);
+	// fs_mkdir("/5", 2);
+	// fs_mkdir("/6", 2);
+	// fs_mkdir("/7", 2);
+
+	// fs_mkdir("/ex:9", 2);
+	// fs_mkdir("/ex:10", 2);
+	// fs_mkdir("/ex:11", 2);
+	// fs_mkdir("/ex:12", 2);
+	// fs_mkdir("/ex:13", 2);
+	// fs_mkdir("/ex:14", 2);
+	// fs_mkdir("/ex:15", 2);
+
+	//fs_mkdir("/EXEX:116", 2);
 	//fs_mkdir("doesnt matter", 2);
 	// fs_mkdir("doesnt matter", 2);
 	// fs_mkdir("doesnt matter", 2);

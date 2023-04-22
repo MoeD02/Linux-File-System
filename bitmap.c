@@ -22,11 +22,12 @@
 BitMap *bitmap;
 int vcb_free;
 int bytes_needed;
+int blocks_needed;
 int init_bitmap(int numberOfBlocks, int blockSize)
 {
 	printf("INITIALIZING BITMAP\n");
 	bytes_needed = (numberOfBlocks + 7) / 8;
-	int blocks_needed = (bytes_needed + sizeof(BitMap) + blockSize - 1) / blockSize;
+	blocks_needed = (bytes_needed + sizeof(BitMap) + blockSize - 1) / blockSize;
 	bitmap = malloc(sizeof(BitMap) + blockSize * blocks_needed);
 	bitmap->bitmap = (int *)(bitmap + 1);
 	vcb_free = numberOfBlocks;
@@ -76,6 +77,7 @@ int set_free(int count, int *data_locations)
 		if (k == count)
 			break;
 	}
+	LBAwrite(bitmap, blocks_needed, 1);
 	return 1;
 }
 
@@ -99,7 +101,10 @@ int set_used(int count, int *data_locations)
 				bit_set(i, index);
 				k++;
 				if (k == count)
+				{
+					LBAwrite(bitmap, blocks_needed, 1);
 					return 1;
+				}
 			}
 		}
 	}

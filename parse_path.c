@@ -23,7 +23,7 @@
 // free shit
 char **path;
 Container *container;
-Container *parse_path(char *filePath, void *entry)
+Container *parse_path(const char *filePath, void *entry)
 {
     container = malloc(sizeof(Container));
     DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
@@ -41,7 +41,7 @@ Container *parse_path(char *filePath, void *entry)
         path[number_of_words - 1] = strdup(token);
         token = strtok(NULL, "/");
     }
-
+    container->name = path[number_of_words - 1];
     if (number_of_words == 0)
     {
         printf("EMPTY\n");
@@ -54,7 +54,7 @@ Container *parse_path(char *filePath, void *entry)
     // THIS IS HITTING EVERYTHING BEFORE LAST ITEM
     for (int i = 0; i < temp; i++)
     {
-        for (int j = 0; j < MAX_ENTRIES; j++)
+        for (int j = 1; j < MAX_ENTRIES; j++)
         {
             printf("WHAT We are READING: %d\nPATH RN: %s\n", dir_entry->data_locations[j], path[i]);
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
@@ -119,17 +119,6 @@ Container *parse_path(char *filePath, void *entry)
     container->dir_entry = dir_entry;
     container->index = -1;
     printf("*******IN ROOT %s\n", dir_entry->name);
-
-    // // Valid and last piece doenst exist
-    // container->dir_entry = dir_entry;
-    // container->index = -1;
-    // // printf("should print: name: %s, j: %d\n", dir_entry->name, -1);
-    // // Adding NULL terminator at the end of array
-    // number_of_words++;
-    // path = realloc(path, number_of_words * sizeof(char *));
-    // path[number_of_words - 1] = NULL;
-    // // printf("PATH: %s\n", path[0]);
-
     return container;
 }
 
@@ -141,13 +130,9 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
 
     printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
     printf("!!!!!! HOW MANY FREE ENTRIES LEFT IN EXTENDED: %d\n", extend->free_entries);
-    // extend->free_entries--;
     DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
-    // CHANGED THIS FROM <= to <
     for (size_t i = 1; i < EXTENDED_ENTRIES - 1; i++)
     {
-        // two issues 1 is its looping twice
-        // figure this out
         LBAread(temp_entry, 1, extend->data_locations[i]);
         printf("!!!!!!!temp NAME:%s\n", temp_entry->name);
         // if match, load next directory
