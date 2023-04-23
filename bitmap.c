@@ -1,19 +1,19 @@
 /**************************************************************
-* Class:  CSC-415-02 Fall 2021
-* Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
-* Student IDs:	920372463, 921140633, 921246050
-* GitHub Name: DiegoF001
-* Group Name: The Baha Blast
-* Project: Basic File System
-*
-* File: fs_structs.h
-*
-* Description: This file contains the structs for our VCB,
-*               Bitmap, and Directory Entries, as well as some
-*               additonal information that the initialization
-*               of file system needs.
-*
-**************************************************************/
+ * Class:  CSC-415-02 Fall 2021
+ * Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
+ * Student IDs:	920372463, 921140633, 921246050
+ * GitHub Name: DiegoF001
+ * Group Name: The Baha Blast
+ * Project: Basic File System
+ *
+ * File: fs_structs.h
+ *
+ * Description: This file contains the structs for our VCB,
+ *               Bitmap, and Directory Entries, as well as some
+ *               additonal information that the initialization
+ *               of file system needs.
+ *
+ **************************************************************/
 
 #include "bitmap.h"
 #include <stdio.h>
@@ -91,7 +91,7 @@ int set_used(int count, int *data_locations)
 	int k = 0;
 	for (int i = 0; i < int_total; i++)
 	{
-		for (int j = 0; j < 32; j++) //32 = size of int
+		for (int j = 0; j < 32; j++) // 32 = size of int
 		{
 			int mask = (1 << j);
 			if ((bitmap->bitmap[i] & mask) == 0) // if bit is 0, block is free

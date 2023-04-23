@@ -76,16 +76,42 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	LBAwrite(root, 1, 6);
 	// LBAwrite(dummy, 1, 57);
 	magic_n = vcb->magic_n;
-	printf("should print: name: downloads, j: -1\n");
+	// printf("should print: name: downloads, j: -1\n");
 	int test;
 
 	fs_mkdir("/test1", 2);
 	fs_mkdir("/test2", 2);
-	fs_mkdir("/test2/lmao", 2);
-	fs_mkdir("/test2/lmao1", 2);
-	fs_mkdir("/test2/lmao/diego", 2);
-	// fs_mkdir("/test3", 2);
-	// fs_mkdir("/test4", 2);
+	fs_mkdir("/test3", 2);
+	fs_mkdir("/test4", 2);
+
+	fs_mkdir("/test5", 2);
+	fs_mkdir("/test6", 2);
+	fs_mkdir("/test7", 2);
+	fs_mkdir("/test8", 2);
+	fs_mkdir("/test9", 2);
+	fs_mkdir("/test10", 2);
+
+	fs_mkdir("/test11", 2);
+
+	fs_mkdir("/test12", 2);
+	// fs_mkdir("/test13", 2);
+	// fs_mkdir("/test14", 2);
+	// fs_mkdir("/test15", 2);
+	// fs_mkdir("/test16", 2);
+
+	// fs_mkdir("/test2/lmao1", 2);
+	// fs_mkdir("/test2/lmao2", 2);
+	// fs_mkdir("/test2/lmao3", 2);
+	// fs_mkdir("/test2/lmao4", 2);
+
+	// fs_mkdir("/test2/lmao5", 2);
+	// fs_mkdir("/test2/lmao6", 2);
+	// fs_mkdir("/test2/lmao7", 2);
+	// fs_mkdir("/test2/lmao8", 2);
+
+	//   fs_mkdir("/test2/lmao/diego", 2);
+	//    fs_mkdir("/test3", 2);
+	//    fs_mkdir("/test4", 2);
 
 	// fs_mkdir("/1", 2);
 	// fs_mkdir("/2", 2);
@@ -100,19 +126,19 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// test = fs_mkdir("/ex:9/test7", 2); // Ex[test7 ...... ] : 0-7
 	// fs_mkdir("/ex:9/test7/moe", 2);	   // test7 [moe.....] : 8:15
 	// fs_mkdir("/ex:9/test7/moe/diego", 2);
-	//fs_mkdir("/ex:9/moe/diego", 2);
-	printf("\t\t\t\t%d\n", test);
+	// fs_mkdir("/ex:9/moe/diego", 2);
+	// printf("\t\t\t\t%d\n", test);
 	// fs_mkdir("/ex:11", 2);
 	// fs_mkdir("/ex:12", 2);
 	// fs_mkdir("/ex:13", 2);
 	// fs_mkdir("/ex:14", 2);
 	// fs_mkdir("/ex:15", 2);
 
-	//fs_mkdir("/EXEX:116", 2);
-	//fs_mkdir("doesnt matter", 2);
+	// fs_mkdir("/EXEX:116", 2);
 	// fs_mkdir("doesnt matter", 2);
-	// fs_mkdir("doesnt matter", 2);
-	// fs_mkdir("doesnt matter", 2);
+	//  fs_mkdir("doesnt matter", 2);
+	//  fs_mkdir("doesnt matter", 2);
+	//  fs_mkdir("doesnt matter", 2);
 
 	LBAread(root, 1, vcb->root_index);
 
