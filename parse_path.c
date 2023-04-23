@@ -146,7 +146,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     // printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
     printf("!!!!!! HOW MANY FREE ENTRIES LEFT IN EXTENDED: %d\n", extend->free_entries);
     DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
-    for (size_t i = 1; i < EXTENDED_ENTRIES - 1; i++)
+    for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
     {
         LBAread(temp_entry, 1, extend->data_locations[i]);
         // printf("!!!!!!!temp NAME:%s\n", temp_entry->name);

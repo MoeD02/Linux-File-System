@@ -23,7 +23,6 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     dir_entries = malloc(bytes_used);
     memset(&dir_entries[0], 0, blockSize);
     memset(&dir_entries[1], 0, blockSize);
-    // for (int i = 2; i < actual_entry_count; i++)
 
     for (int i = 2; i < actual_entry_count - 1; i++)
     {

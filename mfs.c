@@ -171,11 +171,11 @@ Extend *extend_extend(Extend *extended)
 
 	LBAwrite(extended, 1, extended->data_locations[0]); // update not necessary
 	temp->name[0] = ' ';
+
 	for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
 	{
-		// memset(&temp, 0, sizeof(temp));
+		printf("DATA LOCATION OF EXTENDED ARE: %d\n", ext->data_locations[i]);
 		LBAwrite(eraser, 1, ext->data_locations[i]);
-
 		LBAwrite(temp, 1, ext->data_locations[i]);
 	}
 	LBAwrite(eraser, 1, ext->data_locations[0]);
@@ -202,7 +202,8 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 		if (strcmp(" ", temp->name) == 0)
 		{
 			// printf("HERE!!!!!![%s]\n[%d]\n", temp->name, dir_entry->data_locations[i]);
-			dir_entry->free_entries--;
+			if (dir_entry->free_entries != 1)
+				dir_entry->free_entries--;
 			//    LBAwrite(eraser, 1, dir_entry->data_locations[0]);
 			printf("DECREASING FREE ENTRIES AND WRITING BACK TO DISK OF: %s\n AT BLOCK: %d\n", dir_entry->name, dir_entry->data_locations[0]);
 			LBAwrite(dir_entry, 1, dir_entry->data_locations[0]);
