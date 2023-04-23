@@ -23,7 +23,17 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	DirectoryEntry *empty = malloc(sizeof(DirectoryEntry));
 	DirectoryEntry *parent = malloc(sizeof(DirectoryEntry));
 	LBAread(root, 1, 6);
+
 	parse = parse_path(pathname, root);
+	DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
+	int k = 0;
+	for (int j = 1; j < MAX_ENTRIES; j++)
+	{
+		// printf("\t\t\t\t\tHERE!!!!!![%s]\n", dir_entry->name);
+		LBAread(temp3, 1, root->data_locations[j]);
+		k++;
+		printf("\t\t\t\t!!!!!!!!!!!!!!!!!!!TEST!!!!!![%d]\n[%s]\n", parse->dir_entry->data_locations[j], parse->name);
+	}
 	int write_to = 0;
 	// Invalid path
 	if (parse == NULL)
@@ -47,6 +57,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 		new_dir->last_access = time(NULL);
 		new_dir->last_mod = time(NULL);
 		new_dir->free_entries = MAX_ENTRIES - 2; //
+		set_used(MAX_ENTRIES, new_dir->data_locations);
 		empty->name[0] = ' ';
 		for (int i = 2; i < MAX_ENTRIES; i++)
 		{

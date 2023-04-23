@@ -82,22 +82,24 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	fs_mkdir("/test1", 2);
 	fs_mkdir("/test2", 2);
 	fs_mkdir("/test2/lmao", 2);
-	fs_mkdir("/test3", 2);
-	fs_mkdir("/test4", 2);
+	fs_mkdir("/test2/lmao1", 2);
+	fs_mkdir("/test2/lmao/diego", 2);
+	// fs_mkdir("/test3", 2);
+	// fs_mkdir("/test4", 2);
 
-	fs_mkdir("/1", 2);
-	fs_mkdir("/2", 2);
-	fs_mkdir("/3", 2);
-	fs_mkdir("/4", 2);
-	fs_mkdir("/5", 2);
-	fs_mkdir("/6", 2);
-	fs_mkdir("/7", 2);
+	// fs_mkdir("/1", 2);
+	// fs_mkdir("/2", 2);
+	// fs_mkdir("/3", 2);
+	// fs_mkdir("/4", 2);
+	// fs_mkdir("/5", 2);
+	// fs_mkdir("/6", 2);
+	// fs_mkdir("/7", 2);
 
-	fs_mkdir("/ex:9", 2);
-	fs_mkdir("/ex:9/test", 2);		   // make dir expexts -1
-	test = fs_mkdir("/ex:9/test7", 2); // Ex[test7 ...... ] : 0-7
-	fs_mkdir("/ex:9/test7/moe", 2);	   // test7 [moe.....] : 8:15
-	fs_mkdir("/ex:9/test7/moe/diego", 2);
+	// fs_mkdir("/ex:9", 2);
+	// fs_mkdir("/ex:9/test", 2);		   // make dir expexts -1
+	// test = fs_mkdir("/ex:9/test7", 2); // Ex[test7 ...... ] : 0-7
+	// fs_mkdir("/ex:9/test7/moe", 2);	   // test7 [moe.....] : 8:15
+	// fs_mkdir("/ex:9/test7/moe/diego", 2);
 	//fs_mkdir("/ex:9/moe/diego", 2);
 	printf("\t\t\t\t%d\n", test);
 	// fs_mkdir("/ex:11", 2);
