@@ -20,6 +20,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "b_io.h"
+#include "parse_path.h"
+#include "directory.h"
 
 #define MAXFCBS 20
 #define B_CHUNK_SIZE 512
@@ -30,6 +32,9 @@ typedef struct b_fcb
 	char * buf;		//holds the open file buffer
 	int index;		//holds the current position in the buffer
 	int buflen;		//holds how many valid bytes are in the buffer
+	int flags;		//holds the linux flags
+	int currBlk;
+
 	} b_fcb;
 	
 b_fcb fcbArray[MAXFCBS];
@@ -74,9 +79,34 @@ b_io_fd b_open (char * filename, int flags)
 		
 	if (startup == 0) b_init();  //Initialize our system
 	
+	DirectoryEntry parent;
+	Container *parsedPath = parse_path(filename, &parent);
+
+	if (parsedPath == NULL){
+		printf("invalid path\n");
+	return -1;
+	}
+
+	printf("parsed path:\n");
+	print_container(parsedPath);
+
 	returnFd = b_getFCB();				// get our own file descriptor
-										// check for error - all used FCB's
+
+	b_fcb *fcb = &fcbArray[returnFd];
+
+	if(returnFd == -1){
+		printf("FCB Error\n");
+	}									// check for error - all used FCB's
 	
+	fcb->buf = malloc(B_CHUNK_SIZE);
+	fcb->index = 0;
+	fcb->buflen = 0;
+	fcb->flags = flags;
+	fcb->currBlk = 0;
+	
+
+
+
 	return (returnFd);						// all set
 	}
 
