@@ -19,7 +19,7 @@
 #include <time.h>
 
 #include "b_io.h"
-
+#include "directory.h"
 #include <dirent.h>
 #define FT_REGFILE DT_REG
 #define FT_DIRECTORY DT_DIR
@@ -52,7 +52,14 @@ typedef struct
 	unsigned short d_reclen;		 /*length of this record */
 	unsigned short dirEntryPosition; /*which directory entry position, like file pos */
 	uint64_t directoryStartLocation; /*Starting LBA of directory */
+	struct DirectoryEntry *dir;		 // current directory
 } fdDir;
+typedef struct OpenDir
+{
+	struct DirectoryEntry *dir;
+	char *pathname;
+} OpenDir;
+int is_directory_open(const char *pathname);
 
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode);
@@ -69,7 +76,6 @@ int fs_setcwd(char *pathname); // linux chdir
 int fs_isFile(char *filename); // return 1 if file, 0 otherwise
 int fs_isDir(char *pathname);  // return 1 if directory, 0 otherwise
 int fs_delete(char *filename); // removes a file
-
 // This is the strucutre that is filled in from a call to fs_stat
 struct fs_stat
 {

@@ -9,10 +9,13 @@
 #include "bitmap.h"
 #include "directory.h"
 #include "parse_path.h"
+#define MAX_OPEN_DIRS 200
 Container *container;
 DirectoryEntry *eraser;
 DirectoryEntry *new_dir;
 DirectoryEntry *root;
+int directory_position = 0;
+OpenDir open_dirs[MAX_OPEN_DIRS] = {0};
 // pics
 int fs_mkdir(const char *pathname, mode_t mode)
 { // CALL get curr dir
@@ -21,13 +24,21 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	// test2 : 9 21 22 23 24 25 26
 	// lmao should get written to 22
 	//
+	printf("2\n");
 	root = malloc(sizeof(DirectoryEntry));
+	printf("3\n");
 	Container *parse;
-	eraser = malloc(sizeof(DirectoryEntry));
-	memset(&eraser, 0, sizeof(DirectoryEntry));
+	printf("4\n");
+	// eraser = malloc(sizeof(DirectoryEntry));
+	printf("5\n");
+	// memset(&eraser, 0, sizeof(DirectoryEntry));
+	printf("6\n");
 	new_dir = malloc(sizeof(DirectoryEntry));
+	printf("7\n");
 	DirectoryEntry *empty = malloc(sizeof(DirectoryEntry));
+	printf("8\n");
 	DirectoryEntry *parent = malloc(sizeof(DirectoryEntry));
+	printf("9\n");
 	LBAread(root, 1, 6);
 
 	parse = parse_path(pathname, root);
@@ -146,11 +157,11 @@ Extend *extend_directory(DirectoryEntry *dir_entry)
 
 		LBAwrite(temp, 1, extended->data_locations[i]);
 	}
-	LBAwrite(eraser, 1, dir_entry->data_locations[0]);
+	// LBAwrite(eraser, 1, dir_entry->data_locations[0]);
 
 	LBAwrite(dir_entry, 1, dir_entry->data_locations[0]);
 	extended->extended = FALSE;
-	LBAwrite(eraser, 1, extended->data_locations[0]);
+	// LBAwrite(eraser, 1, extended->data_locations[0]);
 
 	LBAwrite(extended, 1, extended->data_locations[0]);
 	free(temp);
@@ -167,7 +178,7 @@ Extend *extend_extend(Extend *extended)
 	set_used(MAX_ENTRIES, new_dir->data_locations);
 	extended->data_locations[EXTENDED_ENTRIES - 1] = ext->data_locations[0];
 	ext->free_entries = EXTENDED_ENTRIES - 1;
-	LBAwrite(eraser, 1, extended->data_locations[0]); // update not necessary
+	// LBAwrite(eraser, 1, extended->data_locations[0]); // update not necessary
 
 	LBAwrite(extended, 1, extended->data_locations[0]); // update not necessary
 	temp->name[0] = ' ';
@@ -175,10 +186,10 @@ Extend *extend_extend(Extend *extended)
 	for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
 	{
 		printf("DATA LOCATION OF EXTENDED ARE: %d\n", ext->data_locations[i]);
-		LBAwrite(eraser, 1, ext->data_locations[i]);
+		// LBAwrite(eraser, 1, ext->data_locations[i]);
 		LBAwrite(temp, 1, ext->data_locations[i]);
 	}
-	LBAwrite(eraser, 1, ext->data_locations[0]);
+	// LBAwrite(eraser, 1, ext->data_locations[0]);
 
 	LBAwrite(ext, 1, ext->data_locations[0]);
 	LBAread(temp, 1, ext->data_locations[1]);
@@ -294,4 +305,133 @@ DirectoryEntry *check_extends_mfs(int starting_block)
 		temp_extension = extend_extend(extend);
 		temp = check_extends_mfs(extend->data_locations[EXTENDED_ENTRIES - 1]);
 	}
+}
+
+int fs_isDir(char *pathname)
+{
+	// dir = malloc(sizeof(DirectoryEntry));
+	container = parse_path(pathname, root);
+	if (container->index == -1)
+	{
+		perror("INVALID PATH");
+		return 0;
+	}
+	else
+	{
+		DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
+		LBAread(temp, 1, container->index);
+		if (temp->isDirectory == TRUE)
+		{
+			free(temp);
+
+			return 1;
+		}
+		else
+		{
+			free(temp);
+
+			return 0;
+		}
+	}
+}
+int fs_isFile(char *filename)
+{
+
+	container = parse_path(filename, root);
+	if (container->index == -1)
+	{
+		perror("INVALID PATH");
+		return 0;
+	}
+	else
+	{
+		DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
+		LBAread(temp, 1, container->index);
+
+		// if not directory then has to be file
+		if (temp->isDirectory == FALSE)
+		{
+			free(temp);
+			return 1;
+		}
+		else
+		{
+			free(temp);
+			return 0;
+		}
+	}
+}
+/*
+typedef struct
+{
+	TO DO:  Fill in this structure with what your open/read directory needs
+	unsigned short d_reclen;
+	unsigned short dirEntryPosition;
+	uint64_t directoryStartLocation;
+} fdDir;
+*/
+
+fdDir *fs_opendir(const char *pathname)
+{
+	container = parse_path(pathname, root);
+	fdDir *fd = malloc(sizeof(fdDir));
+
+	if (is_directory_open(pathname) == 1) // if dir is already open return NULL
+	{
+		return NULL;
+	}
+
+	if (container->index == -1)
+	{
+		perror("INVALID PATH");
+		return 0;
+	}
+	else
+	{
+		DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
+
+		LBAread(temp, 1, container->index);
+		// mark this directory as open
+		for (int i = 0; i < directory_position; i++)
+		{
+			if (open_dirs[i].dir == NULL)
+			{
+				open_dirs[i].dir = temp;
+				open_dirs[i].pathname = strdup(pathname);
+				break;
+			}
+		}
+		fd->dir = malloc(sizeof(DirectoryEntry));
+		// assigning fd variables
+		directory_position++;
+		LBAread(fd->dir, 1, container->index);
+		fd->d_reclen = sizeof(fdDir);			   // might have to change this
+		fd->dirEntryPosition = directory_position; // might have to change this
+		fd->directoryStartLocation = container->index;
+		free(temp);
+	}
+	return fd;
+}
+int fs_setcwd(char *pathname);
+int fs_delete(char *filename);
+char *fs_getcwd(char *pathname, size_t size);
+int fs_closedir(fdDir *dirp);
+struct fs_diriteminfo *fs_readdir(fdDir *dirp)
+{
+	return NULL;
+}
+
+int fs_rmdir(const char *pathname);
+
+// helper function to check if dir is already open
+int is_directory_open(const char *pathname)
+{
+	for (int i = 0; i < directory_position; i++)
+	{
+		if (open_dirs[i].dir != NULL && strcmp(open_dirs[i].pathname, pathname) == 0)
+		{
+			return 1;
+		}
+	}
+	return 0;
 }

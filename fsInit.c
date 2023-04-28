@@ -61,9 +61,15 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	LBAwrite(vcb, 1, 0);
 	LBAwrite(root, 1, 6);
 	magic_n = vcb->magic_n;
-	int test;
+
 	printf("***SIZE OF DIR: %ld\n", sizeof(DirectoryEntry));
-	fs_mkdir("/test1", 2);
+	fs_mkdir("/test2", 2);
+	printf("HELO!!!\n");
+	printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
+	fdDir *test = malloc(sizeof(fdDir));
+
+	test = fs_opendir("/test2");
+	printf("NAME OF DIR: %s\n BLOCK OF DIR: %d\n", test->dir->name, test->dir->data_locations[0]);
 
 	// fs_mkdir("test1/test2", 2);
 	// fs_mkdir("test1/test3", 2);

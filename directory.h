@@ -22,7 +22,7 @@
 #define MAX_ENTRIES 12 // 100 but last cannot be allocated
 #define EXTENDED_ENTRIES 16
 #define UNUSED 0
-#define NAME_LENGTH 446 - 21 //272 + 182 - 8
+#define NAME_LENGTH 446 - 21 // 272 + 182 - 8
 // #define USED 1
 #define TRUE 1
 #define FALSE 0
