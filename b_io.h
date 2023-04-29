@@ -14,6 +14,8 @@
 
 #ifndef _B_IO_H
 #define _B_IO_H
+#define B_READ 1
+#define B_WRITE 2
 #include <fcntl.h>
 
 typedef int b_io_fd;

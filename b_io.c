@@ -29,11 +29,13 @@
 typedef struct b_fcb
 	{
 	/** TODO add al the information you need in the file control block **/
+    DirectoryEntry *fi;
 	char * buf;		//holds the open file buffer
 	int index;		//holds the current position in the buffer
 	int buflen;		//holds how many valid bytes are in the buffer
 	int flags;		//holds the linux flags
 	int currBlk;
+    int numBlk;
 
 	} b_fcb;
 	
@@ -79,16 +81,16 @@ b_io_fd b_open (char * filename, int flags)
 		
 	if (startup == 0) b_init();  //Initialize our system
 	
-	DirectoryEntry parent;
-	Container *parsedPath = parse_path(filename, &parent);
+	DirectoryEntry *fi;
+	Container *parsedPath = parse_path(filename, fi);
 
 	if (parsedPath == NULL){
 		printf("invalid path\n");
 	return -1;
 	}
 
-	printf("parsed path:\n");
-	print_container(parsedPath);
+	// printf("parsed path:\n");
+	// print_container(parsedPath);
 
 	returnFd = b_getFCB();				// get our own file descriptor
 
@@ -97,13 +99,23 @@ b_io_fd b_open (char * filename, int flags)
 	if(returnFd == -1){
 		printf("FCB Error\n");
 	}									// check for error - all used FCB's
-	
+	fcb->fi = fi;
 	fcb->buf = malloc(B_CHUNK_SIZE);
 	fcb->index = 0;
 	fcb->buflen = 0;
+
+	// if(flags == O_RDONLY){
+	// 	fcb->flags = B_READ;
+	// }
+	// else if(flags == O_WRONLY){
+	// 	fcb->flags = B_WRITE;
+	// }
+	// else if(flags == O_RDWR){
+	// 	fcb->flags = B_READ | B_WRITE;
+	// }
 	fcb->flags = flags;
 	fcb->currBlk = 0;
-	
+	fcb->numBlk = (fi->size + (B_CHUNK_SIZE -1)) / B_CHUNK_SIZE;
 
 
 
@@ -131,6 +143,9 @@ int b_seek (b_io_fd fd, off_t offset, int whence)
 // Interface to write function	
 int b_write (b_io_fd fd, char * buffer, int count)
 	{
+		b_fcb *fcb = &fcbArray[fd];
+		DirectoryEntry *fi = fcb->fi;
+
 	if (startup == 0) b_init();  //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
@@ -138,11 +153,50 @@ int b_write (b_io_fd fd, char * buffer, int count)
 		{
 		return (-1); 					//invalid file descriptor
 		}
-		
-		
-	return (0); //Change this
-	}
 
+		if(fcb->fi == -1){
+			printf("ERROR with file descriptor\n");
+			return -1;
+		}
+
+	if(fcb->flags == B_READ){
+		printf("File opened as read-only, cannot write.\n");
+		return -1;
+	}
+	else if(fcb->flags == B_WRITE){
+		printf("File opened as write-only, cannot read.\n");
+		return -1;
+	}
+	if(fcb->index >= fi->size){
+		return 0;
+	}
+	int bytes_read = 0;
+    while (bytes_read < count) {
+        // Determine which block to read from
+        int block_num = (fcb->index + bytes_read) / B_CHUNK_SIZE;
+
+
+        // Determine the position within the block
+        int block_offset = (fcb->index + bytes_read) % B_CHUNK_SIZE;
+
+        // Determine how much to read from the block
+        int remaining_block_bytes = B_CHUNK_SIZE - block_offset;
+        int bytes_to_read = count - bytes_read;
+
+        if (bytes_to_read > remaining_block_bytes) {
+            bytes_to_read = remaining_block_bytes;
+        }
+
+        // Read from the block into the buffer
+        memcpy(buffer + bytes_read, fcb->buf + block_offset, bytes_to_read);
+
+        // Update bytes_read and fcb position
+        bytes_read += bytes_to_read;
+        fcb->index += bytes_to_read;
+    }
+
+    return bytes_read;
+	}
 
 
 // Interface to read a buffer
@@ -166,6 +220,12 @@ int b_write (b_io_fd fd, char * buffer, int count)
 //  +-------------+------------------------------------------------+--------+
 int b_read (b_io_fd fd, char * buffer, int count)
 	{
+        int bytes_read = 0;
+		int bytes_left = count;
+        //int bytes_returned;
+        // int p1,p2,p3;
+        // int num_blocks_to_copy;
+        // int remaining_bytes;
 
 	if (startup == 0) b_init();  //Initialize our system
 
@@ -174,12 +234,82 @@ int b_read (b_io_fd fd, char * buffer, int count)
 		{
 		return (-1); 					//invalid file descriptor
 		}
-		
-	return (0);	//Change this
+
+	while(bytes_left > 0 && fcbArray[fd].index < fcbArray[fd].buflen){
+		int bytes_to_copy = fcbArray[fd].buflen - fcbArray[fd].index;
+		if(bytes_to_copy > bytes_left){
+			bytes_to_copy = bytes_left;
+		}
+		memcpy(buffer + bytes_read, fcbArray[fd].buf + fcbArray[fd].index, bytes_to_copy);
+		fcbArray[fd].index += bytes_to_copy;
+		bytes_read += bytes_to_copy;
+		bytes_left -= bytes_to_copy;
+		}
+
+    // if we still need to read more bytes, read from disk
+    while (bytes_left > 0 && fcbArray[fd].currBlk < fcbArray[fd].numBlk) {
+        int bytes_to_read = B_CHUNK_SIZE;
+        if (bytes_to_read > bytes_left) {
+            bytes_to_read = bytes_left;
+        }
+        char *block_buffer = malloc(B_CHUNK_SIZE);
+
+        b_read_block(fcbArray[fd].fi->data_locations[fcbArray[fd].currBlk], block_buffer);
+        memcpy(buffer + bytes_read, block_buffer, bytes_to_read);
+        fcbArray[fd].currBlk++;
+        fcbArray[fd].buflen = bytes_to_read;
+        fcbArray[fd].index = bytes_to_read;
+        free(block_buffer);
+        bytes_read += bytes_to_read;
+        bytes_left -= bytes_to_read;
+    }
+		return (bytes_read);
+// remaining_bytes = fcbArray[fd].buflen - fcbArray[fd].index;
+// int file_position = (fcbArray[fd].currBlk * B_CHUNK_SIZE) - remaining_bytes;
+// if((count + file_position) >fcbArray[fd].fi->size){
+//     count = fcbArray[fd].fi->size - file_position;
+
+//     if(count < 0){
+//         printf("ERROR: Count: %d  \nDelivered: %d \nCurrBlk: %d \nIndex: %d\n",
+//         count, file_position, fcbArray[fd].currBlk, fcbArray[fd].index);
+//     }
+// }
+// if(remaining_bytes >= count){
+//     p1 = count;
+//     p2 = 0;
+//     p3 = 0;
+// }
+// else{
+//     p1 = remaining_bytes;
+
+//     p3 = count - remaining_bytes;
+
+//     num_blocks_to_copy = p3 / B_CHUNK_SIZE;
+//     p2 = num_blocks_to_copy * B_CHUNK_SIZE;
+//     p3 = p3 - p2;
+// }
+// if(p1 > 0){
+//     memcpy(buffer, fcbArray[fd].buf + fcbArray[fd].index, p1);
+//     fcbArray[fd].index = fcbArray[fd].index + p1;
+// }
+// if(p2 > 0){
+//     bytes_read = LBAread (buffer+p1, num_blocks_to_copy, fcbArray[fd].currBlk +fcbArray[fd].index);
+
+//     fcbArray[fd].currBlk += num_blocks_to_copy;
+//     p2 = bytes_read * B_CHUNK_SIZE;
+
+// }
+
+// 	return (bytes_returned);	//Change this
+
+
+	
 	}
 	
 // Interface to Close the file	
 int b_close (b_io_fd fd)
 	{
-
+        free(fcbArray[fd].buf);
+        fcbArray[fd].buf = NULL;
+        return 0;
 	}

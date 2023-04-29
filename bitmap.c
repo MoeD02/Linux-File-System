@@ -6,12 +6,9 @@
 * Group Name: The Baha Blast
 * Project: Basic File System
 *
-* File: fs_structs.h
+* File: bitmap.c
 *
-* Description: This file contains the structs for our VCB,
-*               Bitmap, and Directory Entries, as well as some
-*               additonal information that the initialization
-*               of file system needs.
+* Description: 
 *
 **************************************************************/
 
