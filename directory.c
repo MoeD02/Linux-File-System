@@ -45,6 +45,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     dir_entries[0].free_entries = MAX_ENTRIES - 2; // last item is saved for extended
     dir_entries[0].size = bytes_needed;
     set_used(blocks_needed, (dir_entries[0].data_locations));
+    dir_entries[0].starting_bock = dir_entries[0].data_locations[0];
     // dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
 
     if (parent == NULL)
@@ -70,6 +71,8 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
         dir_entries[1].isDirectory = parent->isDirectory;
         dir_entries[1].size = parent->size;
         dir_entries[1].extended = parent->extended;
+        dir_entries[1].starting_bock = dir_entries[0].data_locations[0];
+    
         for (int i = 0; i < blocks_needed; i++)
         {
             dir_entries[1].data_locations[i] = parent->data_locations[i];

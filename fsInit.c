@@ -63,19 +63,28 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	magic_n = vcb->magic_n;
 
 	printf("***SIZE OF DIR: %ld\n", sizeof(DirectoryEntry));
-	fs_mkdir("/test2", 2);
+	fs_mkdir("/test1", 2);
 	printf("HELO!!!\n");
-	printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
-	fdDir *test = malloc(sizeof(fdDir));
+	//printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
+	//fdDir *test = malloc(sizeof(fdDir));
 
-	test = fs_opendir("/test2");
-	printf("NAME OF DIR: %s\n BLOCK OF DIR: %d\n", test->dir->name, test->dir->data_locations[0]);
+	// test = fs_opendir("/test2");
+	// printf("NAME OF DIR: %s\n BLOCK OF DIR: %ld\n", test->dir->name, test->directoryStartLocation);
+	//outer
+	fs_mkdir("test1/test2", 2);
 
-	// fs_mkdir("test1/test2", 2);
+	// first
+	fs_mkdir("test1/test1", 2);
 	// fs_mkdir("test1/test3", 2);
 	// fs_mkdir("test1/test4", 2);
+
+	
+	// //second
 	// fs_mkdir("test1/test5", 2);
 	// fs_mkdir("test1/test6", 2);
+
+	// fs_mkdir("test1/test7", 2);
+	//fs_mkdir("test1/test6", 2);
 	// fs_mkdir("test1/test7", 2);
 	// fs_mkdir("test1/test8", 2);
 	// fs_mkdir("test1/test9", 2);
@@ -101,7 +110,6 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// fs_mkdir("test1/test27", 2);
 	// fs_mkdir("test1/test28", 2);
 	// fs_mkdir("/lmao", 2);
-	LBAread(root, 1, vcb->root_index);
 
 	free(vcb);
 	return magic_n;
