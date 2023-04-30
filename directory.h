@@ -19,10 +19,10 @@
 #include <stdio.h>
 #include <time.h>
 #include "mfs.h"
-#define MAX_ENTRIES 7 // 100 but last cannot be allocated
-#define EXTENDED_ENTRIES 9
+#define MAX_ENTRIES 12 // 100 but last cannot be allocated
+#define EXTENDED_ENTRIES 16
 #define UNUSED 0
-#define NAME_LENGTH 446 //272 + 182 - 8
+#define NAME_LENGTH 446 - 21 // 272 + 182 - 8
 // #define USED 1
 #define TRUE 1
 #define FALSE 0
@@ -56,7 +56,7 @@ typedef struct Extend
 {
     unsigned short extended;
     unsigned short free_entries;
-    char garbage[272 + 184 + 40 - 16 - 8];
+    char garbage[272 + 184 + 40 - 16 - 1 - 46 + 8];
     unsigned int data_locations[EXTENDED_ENTRIES]; // Last item is for next extended table
 
 } Extend;
