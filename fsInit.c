@@ -84,13 +84,14 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	fs_mkdir("test1/test5", 2);
 
 	fs_mkdir("test1/test7", 2);
-
-	test = fs_opendir("test1/test7");
-	fs_closedir(test);
-	fdDir *test1 = malloc(sizeof(fdDir));
-	fs_mkdir("test1/test6", 2);
-	test1 = fs_opendir("test1/test6");
-	printf("NAME OF DIR: [%s]\n BLOCK OF DIR: %ld\n", test1->dir->name, test1->directoryStartLocation);
+	fs_mkdir("lmao", 2);
+	fs_mkdir("test1/test7/lmao", 2);
+	//test = fs_opendir("test1/test7/lmao");
+	//fs_closedir(test);
+	//fdDir *test1 = malloc(sizeof(fdDir));
+	//fs_mkdir("test1/test6", 2);
+	//test1 = fs_opendir("test1/test6");
+	//printf("NAME OF DIR: [%s]\n BLOCK OF DIR: %ld\n", test->dir->name, test->directoryStartLocation);
 	// //second
 
 	// fs_mkdir("test1/test6", 2);

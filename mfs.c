@@ -6,6 +6,7 @@
 #include "fsLow.h"
 #include "mfs.h"
 #include "vcb.h"
+//#include "fsInit.c"
 #include "bitmap.h"
 #include "directory.h"
 #include "parse_path.h"
@@ -13,7 +14,16 @@
 Container *container;
 DirectoryEntry *eraser;
 DirectoryEntry *new_dir;
-DirectoryEntry *root;
+DirectoryEntry *cwd;
+
+// global path: 
+/* Whenever I use a path, i check if the given path
+has a slash or not:
+	if it does NOT: relative, attactch my full wd to theirs
+	if it does: leave as it is and pass it to parsepath
+	*/
+	
+char* cwd_path;
 int directory_position = 0;
 OpenDir open_dirs[MAX_OPEN_DIRS] = {0};
 
@@ -26,7 +36,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	// lmao should get written to 22
 	//
 	printf("2\n");
-	root = malloc(sizeof(DirectoryEntry));
+	cwd = malloc(sizeof(DirectoryEntry));
 	printf("3\n");
 	Container *parse;
 	printf("4\n");
@@ -40,9 +50,9 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	printf("8\n");
 	DirectoryEntry *parent = malloc(sizeof(DirectoryEntry));
 	printf("9\n");
-	LBAread(root, 1, 6);
+	LBAread(cwd, 1, 6);
 
-	parse = parse_path(pathname, root);
+	parse = parse_path(pathname, cwd);
 
 	// DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
 	int k = 0;
@@ -89,6 +99,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 		write_to = find_empty_entry(parse->dir_entry);
 		if (write_to == 0)
 		{
+			printf("*******checked %d\n", write_to);
 			write_to = find_empty_entry(parse->dir_entry);
 		}
 		new_dir->starting_bock = write_to;
@@ -129,6 +140,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 			printf("THE BLOCKS THAT %s OWNS ARE: %d\n", new_dir->name, new_dir->data_locations[j]);
 		}
 	}
+	
 	return 1;
 }
 
@@ -202,6 +214,7 @@ int find_empty_entry(DirectoryEntry *dir_entry)
 	{
 		printf("##WHAT We are READING: %d\n", dir_entry->data_locations[i]);
 		LBAread(temp, 1, dir_entry->data_locations[i]);
+		// 
 		// if null, then it's free
 
 		printf("NAME OF DIRECTORY IM ON: [%s]\n", temp->name);
@@ -273,7 +286,7 @@ DirectoryEntry *check_extends_mfs(int starting_block)
 		// if match, load next directory
 		if (strcmp(" ", temp->name) == 0)
 		{
-			printf("FOUND IN ONE OF THE EXTENDS and the block is %d\n", extend->data_locations[i]);
+			printf("FOUND IN ONE OF THE EXTENDS and the block is %d, %d\n", extend->data_locations[i], extend->free_entries);
 			// LBAread(temp_entry, 1, temp_entry->data_locations[i]);
 			if (extend->free_entries != 1)
 			{
@@ -310,7 +323,7 @@ DirectoryEntry *check_extends_mfs(int starting_block)
 int fs_isDir(char *pathname)
 {
 	// dir = malloc(sizeof(DirectoryEntry));
-	container = parse_path(pathname, root);
+	container = parse_path(pathname, cwd);
 	if (container->index == -1)
 	{
 		perror("INVALID PATH");
@@ -339,7 +352,7 @@ int fs_isDir(char *pathname)
 int fs_isFile(char *filename)
 {
 
-	container = parse_path(filename, root);
+	container = parse_path(filename, cwd);
 	if (container->index == -1)
 	{
 		perror("INVALID PATH");
@@ -376,8 +389,8 @@ typedef struct
 
 fdDir *fs_opendir(const char *pathname)
 {
-	LBAread(root, 1, 6);
-	container = parse_path(pathname, root);
+	LBAread(cwd, 1, 6);
+	container = parse_path(pathname, cwd);
 	directory_position++;
 
 	fdDir *fd = malloc(sizeof(fdDir));
@@ -445,9 +458,26 @@ char *fs_getcwd(char *pathname, size_t size)
 	char *directory_string = NULL;
 	size_t buffer_size = size;
 }
+// void init_cwd(){
+// 	cwd = malloc(sizeof(DirectoryEntry));
+// 	LBAread(cwd, 1, vcb->root_index); // load root in
+// }
 int fs_setcwd(char *pathname)
 {
-	return 0;
+	
+	Container* container = malloc(sizeof(Container));
+	container = parse_path(pathname, cwd);
+	//Error, invalid path
+	if(container == NULL){
+		return -1;
+	}
+	//Error, dir doesnt exist
+	if(container->index == -1){
+		return -1;
+	}
+	cwd_path = strdup(pathname);
+
+	return 1;
 }
 int fs_delete(char *filename)
 {

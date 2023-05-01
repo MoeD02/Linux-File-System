@@ -22,11 +22,13 @@
 #include "fsLow.h"
 // free shit
 char **path;
+
 Container *container;
 Container *parse_path(const char *filePath, void *entry)
 {
     container = malloc(sizeof(Container));
     DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
+
     DirectoryEntry *dir_entry = (DirectoryEntry *)entry;
 
     path = NULL;
@@ -74,7 +76,7 @@ Container *parse_path(const char *filePath, void *entry)
                 {
                     LBAread(temp_directory, 1, k);
                     printf("WORDS HIT 1\n");
-                    container->dir_entry = temp_directory;
+                    container->dir_entry = dir_entry;
                     container->index = k;
                     return container;
                 }
@@ -122,8 +124,9 @@ Container *parse_path(const char *filePath, void *entry)
                 else if (temp_directory != NULL && strcmp(path[i], temp_directory->name) == 0)
                 {
                     printf("****FOUND IN EXTENDED %s\n", temp_directory->name);
-                    LBAread(dir_entry, 1, temp_directory->data_locations[j]);
+                    LBAread(dir_entry, 1, container->index);
                 }
+            
             number_of_words--;
             }
         }
@@ -144,6 +147,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
     // printf("!!!!!!!RECUR FREE ENTRIES:%d\n", extend->data_locations[2]);
     printf("!!!!!! HOW MANY FREE ENTRIES LEFT IN EXTENDED: %d\n", extend->free_entries);
     DirectoryEntry *temp_entry = malloc(sizeof(DirectoryEntry));
+    int k = 0;
     for (int i = 1; i < EXTENDED_ENTRIES - 1; i++)
     {
         LBAread(temp_entry, 1, extend->data_locations[i]);
@@ -152,7 +156,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
         if (strcmp(piece, temp_entry->name) == 0)
         {
             // LBAread(temp_entry, 1, extend->data_locations[i]);
-            LBAread(temp_entry, 1, temp_entry->data_locations[0]);
+            //LBAread(temp_entry, 1, temp_entry->data_locations[i]);
             container->dir_entry = temp_entry;
             container->index = extend->data_locations[i];
             printf("\n*********\nCONTENTS OF CONTAINER: \nDIRECTORY NAME: %s\nINDEX: %d\n*********\n", temp_entry->name, container->index);
