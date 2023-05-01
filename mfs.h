@@ -53,11 +53,14 @@ typedef struct
 	unsigned short dirEntryPosition; /*which directory entry position, like file pos */
 	uint64_t directoryStartLocation; /*Starting LBA of directory */
 	struct DirectoryEntry *dir;		 // current directory
+	char *pathname;					 // path for dir
+	int index_in_open_dirs;			 // Index in open_dirs array
 } fdDir;
 typedef struct OpenDir
 {
 	struct DirectoryEntry *dir;
 	char *pathname;
+
 } OpenDir;
 int is_directory_open(const char *pathname);
 
