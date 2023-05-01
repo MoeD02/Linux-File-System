@@ -377,16 +377,20 @@ typedef struct
 fdDir *fs_opendir(const char *pathname)
 {
 	container = parse_path(pathname, root);
+		directory_position++;
+
 	fdDir *fd = malloc(sizeof(fdDir));
 
 	if (is_directory_open(pathname) == 1) // if dir is already open return NULL
 	{
+		directory_position--;
 		return NULL;
 	}
 
 	if (container->index == -1)
 	{
-		perror("INVALID PATH");
+		directory_position--;
+		perror("INVALID PATH WHILE OPENING DIR");
 		return 0;
 	}
 	else
@@ -394,9 +398,9 @@ fdDir *fs_opendir(const char *pathname)
 		DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
 
 		LBAread(temp, 1, container->index);
-		LBAread(temp, 1, temp->data_locations[0]);
+		//LBAread(temp, 1, temp->starting_bock);
 		char *c = temp->name;
-		printf("!!%d!!\n", container->index);
+		
 		// mark this directory as open
 		for (int i = 0; i < directory_position; i++)
 		{
@@ -408,9 +412,7 @@ fdDir *fs_opendir(const char *pathname)
 			}
 		}
 		fd->dir = malloc(sizeof(DirectoryEntry));
-		// assigning fd variables
-		directory_position++;
-		fd->dir = temp;
+		LBAread(fd->dir, 1 , temp->starting_bock);
 		fd->d_reclen = sizeof(fdDir);			   // might have to change this
 		fd->dirEntryPosition = directory_position; // might have to change this
 		fd->directoryStartLocation = temp->data_locations[0];

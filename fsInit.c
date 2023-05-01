@@ -64,17 +64,19 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 
 	printf("***SIZE OF DIR: %ld\n", sizeof(DirectoryEntry));
 	fs_mkdir("/test1", 2);
-	printf("HELO!!!\n");
+	fs_mkdir("/test1/test2", 2);
+    fdDir *test = malloc(sizeof(fdDir));
+    test = fs_opendir("/test1/test2");
 	//printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
 	//fdDir *test = malloc(sizeof(fdDir));
 
-	// test = fs_opendir("/test2");
-	// printf("NAME OF DIR: %s\n BLOCK OF DIR: %ld\n", test->dir->name, test->directoryStartLocation);
+	//test = fs_opendir("/test1");
+	printf("NAME OF DIR: [%s]\n BLOCK OF DIR: %ld\n", test->dir->name, test->directoryStartLocation);
 	//outer
-	fs_mkdir("test1/test2", 2);
+	//fs_mkdir("test1/test2", 2);
 
 	// first
-	fs_mkdir("test1/test1", 2);
+	//fs_mkdir("test1/test1", 2);
 	// fs_mkdir("test1/test3", 2);
 	// fs_mkdir("test1/test4", 2);
 
