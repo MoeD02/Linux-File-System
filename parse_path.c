@@ -25,7 +25,6 @@ char **path;
 Container *container;
 Container *parse_path(const char *filePath, void *entry)
 {
-
     container = malloc(sizeof(Container));
     DirectoryEntry *temp_directory = malloc(sizeof(DirectoryEntry));
     DirectoryEntry *dir_entry = (DirectoryEntry *)entry;
@@ -52,16 +51,16 @@ Container *parse_path(const char *filePath, void *entry)
         return container;
     }
     int temp = number_of_words;
-    // THIS IS HITTING EVERYTHING BEFORE LAST ITEM
+    int k = 0;
     for (int i = 0; i < temp; i++)
     {
-        for (int j = 2; j < MAX_ENTRIES; j++)
+        for (int j = 0; j < MAX_ENTRIES; j++)
         {
             LBAread(temp_directory, 1, dir_entry->data_locations[j]);
-            printf("NAME OF DIR THAT We are READING: %s\nBLOCK NUMBER WE ARE READING: %d\nPATH RN: %s\n", dir_entry->name, dir_entry->data_locations[j], path[i]);
-
+            printf("NAME OF DIR THAT We are READING: %s\nBLOCK NUMBER WE ARE READING: %d\nPATH RN: %s\n NUMBER OF WORDS: %d\n", dir_entry->name, dir_entry->data_locations[j], path[i], number_of_words);
             if (strcmp(path[i], temp_directory->name) == 0)
             {
+                k = dir_entry->data_locations[j];
                 printf("FOUND MATCHING NAMES ON BLOCK %d\n", dir_entry->data_locations[j]);
                 LBAread(dir_entry, 1, dir_entry->data_locations[j]);
 
@@ -73,9 +72,10 @@ Container *parse_path(const char *filePath, void *entry)
                 }
                 if (number_of_words == 1)
                 {
+                    LBAread(temp_directory, 1, k);
                     printf("WORDS HIT 1\n");
-                    container->dir_entry = dir_entry;
-                    container->index = dir_entry->data_locations[i];
+                    container->dir_entry = temp_directory;
+                    container->index = k;
                     return container;
                 }
                 number_of_words--;
@@ -124,11 +124,9 @@ Container *parse_path(const char *filePath, void *entry)
                     printf("****FOUND IN EXTENDED %s\n", temp_directory->name);
                     LBAread(dir_entry, 1, temp_directory->data_locations[j]);
                 }
+            number_of_words--;
             }
         }
-
-        // test [.. , moe]
-        number_of_words--;
     }
 
     container->dir_entry = dir_entry;
@@ -154,6 +152,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
         if (strcmp(piece, temp_entry->name) == 0)
         {
             // LBAread(temp_entry, 1, extend->data_locations[i]);
+            LBAread(temp_entry, 1, temp_entry->data_locations[0]);
             container->dir_entry = temp_entry;
             container->index = extend->data_locations[i];
             printf("\n*********\nCONTENTS OF CONTAINER: \nDIRECTORY NAME: %s\nINDEX: %d\n*********\n", temp_entry->name, container->index);

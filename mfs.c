@@ -42,7 +42,6 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	LBAread(root, 1, 6);
 
 	parse = parse_path(pathname, root);
-		printf("jere");
 
 	//DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
 	int k = 0;
@@ -376,6 +375,7 @@ typedef struct
 
 fdDir *fs_opendir(const char *pathname)
 {
+	LBAread(root, 1, 6);
 	container = parse_path(pathname, root);
 		directory_position++;
 
@@ -412,10 +412,12 @@ fdDir *fs_opendir(const char *pathname)
 			}
 		}
 		fd->dir = malloc(sizeof(DirectoryEntry));
-		LBAread(fd->dir, 1 , temp->starting_bock);
+		LBAread(fd->dir, 1 , container->index);
+		//LBAread(fd->dir, 1 , fd->dir->data_locations[0]);
 		fd->d_reclen = sizeof(fdDir);			   // might have to change this
 		fd->dirEntryPosition = directory_position; // might have to change this
-		fd->directoryStartLocation = temp->data_locations[0];
+		printf("!![%d]!!", container->index);
+		fd->directoryStartLocation = fd->dir->starting_bock;
 		free(temp);
 	}
 	return fd;
