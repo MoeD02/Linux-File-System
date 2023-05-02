@@ -8,10 +8,7 @@
 *
 * File: vcb.h
 *
-* Description: This file contains the structs for our VCB,
-*               Bitmap, and Directory Entries, as well as some
-*               additonal information that the initialization
-*               of file system needs.
+* Description: This file contains the structs for our VCB.
 *
 **************************************************************/
 
