@@ -168,61 +168,22 @@ int b_seek(b_io_fd fd, off_t offset, int whence)
 	return (position); 
 }
 
-// Interface to write function
-int b_write(b_io_fd fd, char *buffer, int count)
-{
-	b_fcb *fcb = &fcbArray[fd];
-	DirectoryEntry *fi = fcb->fi;
+// Interface to write function	
 
-	if (startup == 0)
-		b_init(); // Initialize our system
+
+
+
+int b_write (b_io_fd fd, char * buffer, int count)
+{
+
+	if (startup == 0) b_init();  //Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
 	if ((fd < 0) || (fd >= MAXFCBS))
-	{
-		return (-1); // invalid file descriptor
-	}
-
-	if (fcb->fi == NULL)
-	{
-		printf("ERROR with file descriptor\n");
-		return -1;
-	}
-
-	//Make sure the write doesn't exceed file size, if it does it means the file
-	//should be extended...
-	if (fcb->index >= fi->size)
-	{
-		return 0;
-	}
-
-	int bytes_read = 0;
-	while (bytes_read < count)
-	{
-		// Determine which block to read from
-		int block_num = (fcb->index + bytes_read) / B_CHUNK_SIZE;
-
-		// Determine the position within the block
-		int block_offset = (fcb->index + bytes_read) % B_CHUNK_SIZE;
-
-		// Determine how much to read from the block
-		int remaining_block_bytes = B_CHUNK_SIZE - block_offset;
-		int bytes_to_read = count - bytes_read;
-
-		if (bytes_to_read > remaining_block_bytes)
 		{
-			bytes_to_read = remaining_block_bytes;
-		}
-
-		// Read from the block into the buffer
-		memcpy(buffer + bytes_read, fcb->buf + block_offset, bytes_to_read);
-
-		// Update bytes_read and fcb index
-		bytes_read += bytes_to_read;
-		fcb->index += bytes_to_read;
+		return (-1); 					//invalid file descriptor
 	}
-
-	return bytes_read;
+	return (0); //Change this
 }
 
 // Interface to read a buffer
