@@ -95,4 +95,5 @@ struct fs_stat
 };
 
 int fs_stat(const char *path, struct fs_stat *buf);
+struct DirectoryEntry *check_extends_read(int starting_block, fdDir *dirp);
 #endif

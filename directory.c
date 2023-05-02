@@ -18,8 +18,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     int blocks_needed = (bytes_needed + blockSize - 1) / blockSize;
     int bytes_used = blocks_needed * blockSize;
     int actual_entry_count = bytes_used / sizeof(DirectoryEntry);
-    printf("BYTES NEEEDED %d\n BLOCKS NEEDED: %d\n BYTES USED: %d\n ACTUAL ENTRY COUNT: %d\n",
-           bytes_needed, blocks_needed, bytes_used, actual_entry_count);
+
     dir_entries = malloc(bytes_used);
     memset(&dir_entries[0], 0, blockSize);
     memset(&dir_entries[1], 0, blockSize);
@@ -46,7 +45,6 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     dir_entries[0].size = bytes_needed;
     set_used(blocks_needed, (dir_entries[0].data_locations));
     dir_entries[0].starting_bock = dir_entries[0].data_locations[0];
-    // dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
 
     if (parent == NULL)
     {
@@ -78,13 +76,8 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
             dir_entries[1].data_locations[i] = parent->data_locations[i];
         }
     }
-    printf("SIZE OF DIR: %d\n", dir_entries[0].size);
-    for (int i = 0; i < MAX_ENTRIES; i++)
-    {
-        printf("%d\n", dir_entries[0].data_locations[i]);
-    }
+
     LBAwrite(dir_entries, blocks_needed, dir_entries[0].data_locations[0]);
-    printf("\nBYTES MALLOCED : %d\n", bytes_used);
 
     DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
     int temp2 = dir_entries[0].data_locations[0];
@@ -95,13 +88,6 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
         LBAwrite(temp, 1, temp2);
         temp2++;
     }
-
-    // DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
-    // for (int j = 0; j < MAX_ENTRIES; j++)
-    // {
-    //     LBAread(temp3, 1, dir_entries[0].data_locations[j]);
-    //     printf("[%s]\n", temp3->name);
-    // }
 
     return dir_entries[0].data_locations[0];
 }
