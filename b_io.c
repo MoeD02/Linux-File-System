@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "b_io.h"
+#include "fsLow.h"
 #include "parse_path.h"
 #include "directory.h"
 
@@ -30,12 +31,12 @@ typedef struct b_fcb
 {
 	/** TODO add al the information you need in the file control block **/
 	DirectoryEntry *fi;
-	char *buf;	// holds the open file buffer
-	int index;	// holds the current position in the buffer
-	int buflen; // holds how many valid bytes are in the buffer
-	int flags;	// holds the linux flags
-	int currBlk; //keeps track of current block being read
-	int numBlk;  //total # of blocks
+	char *buf;	 // holds the open file buffer
+	int index;	 // holds the current position in the buffer
+	int buflen;	 // holds how many valid bytes are in the buffer
+	int flags;	 // holds the linux flags
+	int currBlk; // keeps track of current block being read
+	int numBlk;	 // total # of blocks
 
 } b_fcb;
 
@@ -80,7 +81,6 @@ b_io_fd b_open(char *filename, int flags)
 
 	DirectoryEntry *fi;
 	Container *container = parse_path(filename, &fi);
-	
 
 	if (container == NULL)
 	{
@@ -98,7 +98,7 @@ b_io_fd b_open(char *filename, int flags)
 		return -1;
 	}
 
-	//Setting the flags and determining the access mode
+	// Setting the flags and determining the access mode
 	if (flags == O_RDONLY)
 	{
 		fcb->flags = B_READ;
@@ -107,12 +107,12 @@ b_io_fd b_open(char *filename, int flags)
 	{
 		fcb->flags = B_WRITE;
 	}
-	else if(flags == O_RDWR){
+	else if (flags == O_RDWR)
+	{
 		fcb->flags = B_READ | B_WRITE;
 	}
 
-
-	//Initializing FCB
+	// Initializing FCB
 	fcb->fi = fi;
 	fcb->buf = malloc(B_CHUNK_SIZE);
 	fcb->index = 0;
@@ -136,17 +136,17 @@ int b_seek(b_io_fd fd, off_t offset, int whence)
 	{
 		return (-1); // invalid file descriptor
 	}
-	//Sets the position to offset from the beginning of the file
+	// Sets the position to offset from the beginning of the file
 	if (whence == SEEK_SET)
 	{
 		position = offset;
 	}
-	//Sets position to current index of fcb + offset
+	// Sets position to current index of fcb + offset
 	else if (whence == SEEK_CUR)
 	{
 		position = fcb->index + offset;
 	}
-	//Sets the position to the size of the file + offset
+	// Sets the position to the size of the file + offset
 	else if (whence == SEEK_END)
 	{
 		position = fcb->fi->size + offset;
@@ -165,25 +165,23 @@ int b_seek(b_io_fd fd, off_t offset, int whence)
 
 	fcb->index = position;
 
-	return (position); 
+	return (position);
 }
 
-// Interface to write function	
+// Interface to write function
 
-
-
-
-int b_write (b_io_fd fd, char * buffer, int count)
+int b_write(b_io_fd fd, char *buffer, int count)
 {
 
-	if (startup == 0) b_init();  //Initialize our system
+	if (startup == 0)
+		b_init(); // Initialize our system
 
 	// check that fd is between 0 and (MAXFCBS-1)
 	if ((fd < 0) || (fd >= MAXFCBS))
-		{
-		return (-1); 					//invalid file descriptor
+	{
+		return (-1); // invalid file descriptor
 	}
-	return (0); //Change this
+	return (0); // Change this
 }
 
 // Interface to read a buffer
@@ -259,20 +257,18 @@ int b_read(b_io_fd fd, char *buffer, int count)
 
 		// Free the block buffer
 		free(block_buffer);
-		
-		//update values
+
+		// update values
 		bytes_read += bytes_to_read;
 		bytes_left -= bytes_to_read;
 
-		//Debugging
-		// printf("BYTES LEFT: %d\n", bytes_left);
-		// printf("CURRBLK: %d\n", fcbArray[fd].currBlk);
-		// printf("NUMBLK: %d\n", fcbArray[fd].numBlk);
+		// Debugging
+		//  printf("BYTES LEFT: %d\n", bytes_left);
+		//  printf("CURRBLK: %d\n", fcbArray[fd].currBlk);
+		//  printf("NUMBLK: %d\n", fcbArray[fd].numBlk);
 	}
 	return (bytes_read);
 }
-
-
 
 // Interface to Close the file
 int b_close(b_io_fd fd)
