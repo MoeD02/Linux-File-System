@@ -67,4 +67,6 @@ Extend *extend_directory(DirectoryEntry *dir_entry);
 Extend *extend_extend(Extend *extended);
 DirectoryEntry *check_extends_mfs(int);
 int find_empty_entry(DirectoryEntry *);
+void erase_extends(Extend *extend);
+
 #endif
