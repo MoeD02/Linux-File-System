@@ -126,8 +126,8 @@ Container *parse_path(const char *filePath, void *entry)
                     printf("****FOUND IN EXTENDED %s\n", temp_directory->name);
                     LBAread(dir_entry, 1, container->index);
                 }
-            
-            number_of_words--;
+
+                number_of_words--;
             }
         }
     }
@@ -156,7 +156,7 @@ DirectoryEntry *check_extends(char *name, int starting_block, char *piece)
         if (strcmp(piece, temp_entry->name) == 0)
         {
             // LBAread(temp_entry, 1, extend->data_locations[i]);
-            //LBAread(temp_entry, 1, temp_entry->data_locations[i]);
+            // LBAread(temp_entry, 1, temp_entry->data_locations[i]);
             container->dir_entry = temp_entry;
             container->index = extend->data_locations[i];
             printf("\n*********\nCONTENTS OF CONTAINER: \nDIRECTORY NAME: %s\nINDEX: %d\n*********\n", temp_entry->name, container->index);

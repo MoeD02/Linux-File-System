@@ -55,8 +55,8 @@ typedef struct
 	struct DirectoryEntry *dir;		 // current directory
 	char *pathname;					 // path for dir
 	int index_in_open_dirs;			 // Index in open_dirs array
-	int read_index;
-	int extended_read_index;
+	int read_index;					 // index for read function
+	int extended_read_index;		 // index for read function -used when extended exists-
 } fdDir;
 typedef struct OpenDir
 {
@@ -65,7 +65,7 @@ typedef struct OpenDir
 
 } OpenDir;
 int is_directory_open(const char *pathname);
-DirectoryEntry *check_extends_read(int starting_block, fdDir *dirp);
+
 // Key directory functions
 int fs_mkdir(const char *pathname, mode_t mode);
 int fs_rmdir(const char *pathname);
@@ -95,5 +95,4 @@ struct fs_stat
 };
 
 int fs_stat(const char *path, struct fs_stat *buf);
-void erase_extends(Extend* extend);
 #endif
