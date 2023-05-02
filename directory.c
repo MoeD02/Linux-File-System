@@ -72,7 +72,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
         dir_entries[1].size = parent->size;
         dir_entries[1].extended = parent->extended;
         dir_entries[1].starting_bock = dir_entries[0].data_locations[0];
-    
+
         for (int i = 0; i < blocks_needed; i++)
         {
             dir_entries[1].data_locations[i] = parent->data_locations[i];
