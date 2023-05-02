@@ -39,6 +39,7 @@ typedef struct DirectoryEntry
     unsigned short free_entries;              // Available entries
     // unsigned short flag;
     unsigned short extended;
+    unsigned int starting_index;    //starting block index of file
     time_t creation_date; // When was it Created
     time_t last_access;   // when it was last accessed
     time_t last_mod;      // when it was last modified

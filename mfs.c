@@ -16,6 +16,8 @@ DirectoryEntry *new_dir;
 DirectoryEntry *root;
 int directory_position = 0;
 OpenDir open_dirs[MAX_OPEN_DIRS] = {0};
+
+
 // pics
 int fs_mkdir(const char *pathname, mode_t mode)
 { // CALL get curr dir

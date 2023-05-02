@@ -36,7 +36,7 @@
 
 /****   SET THESE TO 1 WHEN READY TO TEST THAT COMMAND ****/
 #define CMDLS_ON 0
-#define CMDCP_ON 0
+#define CMDCP_ON 1
 #define CMDMV_ON 0
 #define CMDMD_ON 0
 #define CMDRM_ON 0
@@ -44,8 +44,8 @@
 #define CMDCP2FS_ON 0
 #define CMDCD_ON 0
 #define CMDPWD_ON 0
-#define CMDTOUCH_ON 0
-#define CMDCAT_ON 0
+#define CMDTOUCH_ON 1
+#define CMDCAT_ON 1
 
 typedef struct dispatch_t
 {
@@ -683,6 +683,27 @@ void processcommand(char *cmd)
 	cmdv = NULL;
 }
 
+void test_b_open() {
+	printf("-------------b_open test-------------------------\n");
+    // Test opening an existing file in read mode
+    int fd1 = b_open("test.txt", O_RDONLY);
+    if (fd1 == -1) {
+        printf("Failed to open file!\n");
+    } else {
+        printf("File opened successfully in read mode!\n");
+        b_close(fd1);
+    }
+
+    // Test opening a non-existing file in write mode
+    int fd2 = b_open("newfile.txt", O_WRONLY);
+    if (fd2 == -1) {
+        printf("Failed to create file!\n");
+    } else {
+        printf("File created successfully in write mode!\n");
+        b_close(fd2);
+    }
+}
+
 int main(int argc, char *argv[])
 {
 	char *cmdin;
@@ -729,6 +750,8 @@ int main(int argc, char *argv[])
 
 	using_history();
 	stifle_history(200); // max history entries
+
+	//test_b_open(); 
 
 	while (1)
 	{
