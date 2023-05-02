@@ -1,3 +1,16 @@
+/**************************************************************
+ * Class:  CSC-415-02 Fall 2021
+ * Names: Diego Flores, Kemi Adebisi, Mohammad Dahbour
+ * Student IDs:	920372463, 921140633, 921246050
+ * GitHub Name: DiegoF001
+ * Group Name: The Baha Blast
+ * Project: Basic File System
+ *
+ * File: directory.c
+ *
+ * Description: This file initializes root
+ *
+ **************************************************************/
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -13,17 +26,18 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
 {
     printf("INITIALIZING ROOT\n");
     DirectoryEntry *dir_entries;
-    // add extended to size
+    // Calculate the number of bytes needed for all directory entries
     int bytes_needed = MAX_ENTRIES * sizeof(DirectoryEntry);
     int blocks_needed = (bytes_needed + blockSize - 1) / blockSize;
     int bytes_used = blocks_needed * blockSize;
     int actual_entry_count = bytes_used / sizeof(DirectoryEntry);
-    printf("BYTES NEEEDED %d\n BLOCKS NEEDED: %d\n BYTES USED: %d\n ACTUAL ENTRY COUNT: %d\n",
-           bytes_needed, blocks_needed, bytes_used, actual_entry_count);
+    
+    // Allocate memory for directory entries and zero it out
     dir_entries = malloc(bytes_used);
     memset(&dir_entries[0], 0, blockSize);
     memset(&dir_entries[1], 0, blockSize);
 
+    // Initialize each directory entry
     for (int i = 2; i < actual_entry_count - 1; i++)
     {
         memset(&dir_entries[i], 0, blockSize);
@@ -35,6 +49,7 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
             dir_entries[i].data_locations[j] = 0;
         }
     }
+
     // Assigning root variables
     strcpy(dir_entries[0].name, ".");
     dir_entries[0].creation_date = time(NULL);
@@ -45,8 +60,9 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
     dir_entries[0].free_entries = MAX_ENTRIES - 2; // last item is saved for extended
     dir_entries[0].size = bytes_needed;
     set_used(blocks_needed, (dir_entries[0].data_locations));
-    // dir_entries[0].starting_block_index= dir_entries[0].data_locations[0];
+    dir_entries[0].starting_bock = dir_entries[0].data_locations[0];
 
+    // Initialize parent directory entry
     if (parent == NULL)
     {
         strcpy(dir_entries[1].name, "..");
@@ -70,18 +86,16 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
         dir_entries[1].isDirectory = parent->isDirectory;
         dir_entries[1].size = parent->size;
         dir_entries[1].extended = parent->extended;
+        dir_entries[1].starting_bock = dir_entries[0].data_locations[0];
+
         for (int i = 0; i < blocks_needed; i++)
         {
             dir_entries[1].data_locations[i] = parent->data_locations[i];
         }
     }
-    printf("SIZE OF DIR: %d\n", dir_entries[0].size);
-    for (int i = 0; i < MAX_ENTRIES; i++)
-    {
-        printf("%d\n", dir_entries[0].data_locations[i]);
-    }
+
+    // Write directory entries to disk
     LBAwrite(dir_entries, blocks_needed, dir_entries[0].data_locations[0]);
-    printf("\nBYTES MALLOCED : %d\n", bytes_used);
 
     DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
     int temp2 = dir_entries[0].data_locations[0];
@@ -92,13 +106,6 @@ int init_root(uint64_t blockSize, DirectoryEntry *parent)
         LBAwrite(temp, 1, temp2);
         temp2++;
     }
-
-    // DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
-    // for (int j = 0; j < MAX_ENTRIES; j++)
-    // {
-    //     LBAread(temp3, 1, dir_entries[0].data_locations[j]);
-    //     printf("[%s]\n", temp3->name);
-    // }
 
     return dir_entries[0].data_locations[0];
 }

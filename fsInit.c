@@ -9,8 +9,7 @@
  * File: fsInit.c
  *
  * Description: Main driver for file system assignment.
- *
- * This file is where you will start and initialize your system
+ * 				This file is where you will start and *				initialize your system.
  *
  **************************************************************/
 
@@ -33,10 +32,8 @@ VCB *vcb;
 int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 {
 
-	// DirectoryEntry *downloads = malloc(sizeof(DirectoryEntry));
 	DirectoryEntry *root = malloc(sizeof(DirectoryEntry));
-	// DirectoryEntry *file = malloc(sizeof(DirectoryEntry));
-	// DirectoryEntry *dummy = malloc(sizeof(DirectoryEntry));
+
 	printf("Initializing File System with %ld blocks with a block size of %ld\n",
 		   numberOfBlocks, blockSize);
 	/* TODO: Add any code you need to initialize your file system. */
@@ -45,13 +42,14 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// will save block 0 to vcb
 	LBAread(vcb, 1, 0);
 	// check if has be initialized already
-	// if (vcb->magic_n == MAGIC_NUMBER)
-	// {
-	// 	printf("--Already initialized--\n");
-	// 	magic_n = vcb->magic_n;
-	// 	free(vcb);
-	// 	return magic_n;
-	// }
+	if (vcb->magic_n == MAGIC_NUMBER)
+	{
+		printf("--Already initialized--\n");
+		magic_n = vcb->magic_n;
+		free(vcb);
+		return magic_n;
+	}
+	// ELSE init bitmap and root:
 	init_bitmap(numberOfBlocks, blockSize);
 	init_vcb(numberOfBlocks, blockSize);
 
@@ -61,47 +59,6 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	LBAwrite(vcb, 1, 0);
 	LBAwrite(root, 1, 6);
 	magic_n = vcb->magic_n;
-
-	// printf("***SIZE OF DIR: %ld\n", sizeof(DirectoryEntry));
-	// fs_mkdir("/test2", 2);
-	// printf("HELO!!!\n");
-	// printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
-	// fdDir *test = malloc(sizeof(fdDir));
-
-	// test = fs_opendir("/test2");
-	// printf("NAME OF DIR: %s\n BLOCK OF DIR: %d\n", test->dir->name, test->dir->data_locations[0]);
-
-	// fs_mkdir("test1/test2", 2);
-	// fs_mkdir("test1/test3", 2);
-	// fs_mkdir("test1/test4", 2);
-	// fs_mkdir("test1/test5", 2);
-	// fs_mkdir("test1/test6", 2);
-	// fs_mkdir("test1/test7", 2);
-	// fs_mkdir("test1/test8", 2);
-	// fs_mkdir("test1/test9", 2);
-	// fs_mkdir("test1/test10", 2);
-
-	// fs_mkdir("test1/test11", 2);
-	// fs_mkdir("test1/test12", 2);
-	// fs_mkdir("test1/test13", 2);
-	// fs_mkdir("test1/test14", 2);
-	// fs_mkdir("test1/test15", 2);
-	// fs_mkdir("test1/test16", 2);
-	// fs_mkdir("test1/test17", 2);
-	// fs_mkdir("test1/test18", 2);
-	// fs_mkdir("test1/test19", 2);
-	// fs_mkdir("test1/test20", 2);
-
-	// fs_mkdir("test1/test21", 2);
-	// fs_mkdir("test1/test22", 2);
-	// fs_mkdir("test1/test23", 2);
-	// fs_mkdir("test1/test24", 2);
-	// fs_mkdir("test1/test25", 2);
-	// fs_mkdir("test1/test26", 2);
-	// fs_mkdir("test1/test27", 2);
-	// fs_mkdir("test1/test28", 2);
-	// fs_mkdir("/lmao", 2);
-	LBAread(root, 1, vcb->root_index);
 
 	free(vcb);
 	return magic_n;

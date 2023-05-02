@@ -53,11 +53,16 @@ typedef struct
 	unsigned short dirEntryPosition; /*which directory entry position, like file pos */
 	uint64_t directoryStartLocation; /*Starting LBA of directory */
 	struct DirectoryEntry *dir;		 // current directory
+	char *pathname;					 // path for dir
+	int index_in_open_dirs;			 // Index in open_dirs array
+	int read_index;					 // index for read function
+	int extended_read_index;		 // index for read function -used when extended exists-
 } fdDir;
 typedef struct OpenDir
 {
 	struct DirectoryEntry *dir;
 	char *pathname;
+
 } OpenDir;
 int is_directory_open(const char *pathname);
 
@@ -90,6 +95,5 @@ struct fs_stat
 };
 
 int fs_stat(const char *path, struct fs_stat *buf);
-
-
+struct DirectoryEntry *check_extends_read(int starting_block, fdDir *dirp);
 #endif
