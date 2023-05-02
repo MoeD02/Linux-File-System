@@ -6,7 +6,6 @@
 #include "fsLow.h"
 #include "mfs.h"
 #include "vcb.h"
-// #include "fsInit.c"
 #include "bitmap.h"
 #include "directory.h"
 #include "parse_path.h"
@@ -21,48 +20,35 @@ DirectoryEntry *cwd;
 has a slash or not:
 	if it does NOT: relative, attactch my full wd to theirs
 	if it does: leave as it is and pass it to parsepath
-	*/
+*/
 
 char *cwd_path;
 int directory_position = 0;
 OpenDir open_dirs[MAX_OPEN_DIRS] = {0};
-
-// pics
 int fs_mkdir(const char *pathname, mode_t mode)
-{ // CALL get curr dir
-	// root: 6 7 8 9 10 11 12
-	// test1 :
-	// test2 : 9 21 22 23 24 25 26
-	// lmao should get written to 22
-	//
-	printf("2\n");
-	cwd = malloc(sizeof(DirectoryEntry));
-	printf("3\n");
+{
+	int checker = 0;
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		cwd_path = malloc(sizeof('/') + 1);
+		memcpy(cwd_path, "/", sizeof(char));
+		LBAread(cwd, 1, 6);
+	}
+	// absolute: make cwd root and save state to recover later
+	if (pathname[0] == '/')
+	{
+		checker = cwd->starting_bock;
+		LBAread(cwd, 1, 6); // from toot
+	}
 	Container *parse;
-	printf("4\n");
-	// eraser = malloc(sizeof(DirectoryEntry));
-	printf("5\n");
-	// memset(&eraser, 0, sizeof(DirectoryEntry));
-	printf("6\n");
 	new_dir = malloc(sizeof(DirectoryEntry));
-	printf("7\n");
 	DirectoryEntry *empty = malloc(sizeof(DirectoryEntry));
-	printf("8\n");
 	DirectoryEntry *parent = malloc(sizeof(DirectoryEntry));
-	printf("9\n");
-	LBAread(cwd, 1, 6);
-
+	if (cwd == NULL)
+		LBAread(cwd, 1, 6);
 	parse = parse_path(pathname, cwd);
-
-	// DirectoryEntry *temp3 = malloc(sizeof(DirectoryEntry));
 	int k = 0;
-	// for (int j = 0; j < MAX_ENTRIES; j++)
-	// {
-	// 	// printf("\t\t\t\t\tHERE!!!!!![%s]\n", dir_entry->name);
-	// 	LBAread(temp3, 1, root->data_locations[j]);
-	// 	k++;
-	// 	printf("\t\t\t\t!!!!!!!!!!!!!!!!!!!TEST!!!!!![%d]\n[%s]\n", parse->dir_entry->data_locations[j], parse->name);
-	// }
 	int write_to = 0;
 	// Invalid path
 	if (parse == NULL)
@@ -73,12 +59,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	// Can be created || ADD PARENT
 	else if (parse && parse->index == -1)
 	{
-		// this read root
 		parent = parse->dir_entry;
-		// LBAread(parent, 1, parse->dir_entry->data_locations[0]);
-		//  LBAread(parent, 1, parse->dir_entry->data_locations[0]);
-		//   parent->free_entries--;
-		//   LBAwrite(parent, 1, parse->dir_entry->data_locations[0]);
 		strcpy(new_dir->name, parse->name);
 		new_dir->isDirectory = TRUE;
 		new_dir->size = sizeof(DirectoryEntry);
@@ -141,6 +122,8 @@ int fs_mkdir(const char *pathname, mode_t mode)
 		}
 	}
 
+	if (checker)
+		LBAread(cwd, 1, checker);
 	return 1;
 }
 
@@ -360,6 +343,12 @@ DirectoryEntry *check_extends_read(int starting_block, fdDir *dirp)
 }
 int fs_isDir(char *pathname)
 {
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
+
 	// dir = malloc(sizeof(DirectoryEntry));
 	container = parse_path(pathname, cwd);
 	if (container->index == -1)
@@ -389,7 +378,11 @@ int fs_isDir(char *pathname)
 }
 int fs_isFile(char *filename)
 {
-
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
 	container = parse_path(filename, cwd);
 	if (container->index == -1)
 	{
@@ -427,7 +420,11 @@ typedef struct
 
 fdDir *fs_opendir(const char *pathname)
 {
-	LBAread(cwd, 1, 6);
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
 	container = parse_path(pathname, cwd);
 	directory_position++;
 
@@ -493,22 +490,139 @@ int is_directory_open(const char *pathname)
 	return 0;
 }
 
-int fs_rmdir(const char *pathname);
+int fs_rmdir(const char *pathname)
+{
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
+	Container *container = malloc(sizeof(Container));
+	DirectoryEntry *erased = malloc(sizeof(DirectoryEntry));
+	Extend *extend = malloc(sizeof(Extend));
+	DirectoryEntry *cleaner = malloc(sizeof(DirectoryEntry));
+	container = parse_path(pathname, cwd);
+	// Error, invalid path
+	if (container == NULL)
+	{
+		return -1;
+	}
+	// Error, dir doesnt exist
+	if (container->index == -1)
+	{
+		return -1;
+	}
+	// it must be a file, not a dir
+	if (container->dir_entry->isDirectory == FALSE)
+	{
+		return -1;
+	}
+	LBAread(erased, 1, container->index);
+	// recursively deletes all extends
+	if (erased->extended == 1)
+	{
+		erase_extends(extend);
+	}
+	// set bits as free so they can be overwritten later
+	set_free(MAX_ENTRIES, erased->data_locations);
+	memset(cleaner, 0, sizeof(DirectoryEntry));
+	cleaner->name[0] = ' ';
+	LBAwrite(cleaner, 1, erased->starting_bock);
+
+	free(extend);
+	free(cleaner);
+	free(erased);
+	free(container);
+	return 0;
+}
 
 char *fs_getcwd(char *pathname, size_t size)
 {
-	char *directory_string = NULL;
-	size_t buffer_size = size;
+	// return empty path
+	if (sizeof(cwd_path) > size)
+		return pathname;
+	// return filled up path
+	strcpy(pathname, cwd_path);
+	return pathname;
 }
 int fs_setcwd(char *pathname)
 {
-	return 0;
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
+	Container *container = malloc(sizeof(Container));
+	container = parse_path(pathname, cwd);
+	// Error, invalid path
+	if (container == NULL)
+	{
+		return -1;
+	}
+	// Error, dir doesnt exist
+	if (container->index == -1)
+	{
+		return -1;
+	}
+	LBAread(cwd, 1, container->index);
+	cwd_path = strdup(pathname);
+	free(container);
+	return 1;
 }
 int fs_delete(char *filename)
 {
+	if (cwd == NULL)
+	{
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
+	}
+	Container *container = malloc(sizeof(Container));
+	DirectoryEntry *erased = malloc(sizeof(DirectoryEntry));
+	Extend *extend = malloc(sizeof(Extend));
+	DirectoryEntry *cleaner = malloc(sizeof(DirectoryEntry));
+	container = parse_path(filename, cwd);
+	// Error, invalid path
+	if (container == NULL)
+	{
+		return -1;
+	}
+	// Error, dir doesnt exist
+	if (container->index == -1)
+	{
+		return -1;
+	}
+	// it must be a file, not a dir
+	if (container->dir_entry->isDirectory == TRUE)
+	{
+		return -1;
+	}
+	LBAread(erased, 1, container->index);
+	// recursively deletes all extends
+	if (erased->extended == 1)
+	{
+		erase_extends(extend);
+	}
+	// set bits as free so they can be overwritten later
+	set_free(MAX_ENTRIES, erased->data_locations);
+	memset(cleaner, 0, sizeof(DirectoryEntry));
+	cleaner->name[0] = ' ';
+	LBAwrite(cleaner, 1, erased->starting_bock);
+
+	free(extend);
+	free(cleaner);
+	free(erased);
+	free(container);
 	return 0;
 }
-
+void erase_extends(Extend *extend)
+{
+	set_free(EXTENDED_ENTRIES, extend->data_locations);
+	if (extend->extended == 1)
+	{
+		LBAread(extend, 1, extend->data_locations[EXTENDED_ENTRIES - 1]);
+		erase_extends(extend);
+	}
+}
 int fs_closedir(fdDir *dirp)
 {
 	if (is_directory_open(dirp->pathname) == 1) // check if dir is already open
@@ -531,98 +645,28 @@ int fs_closedir(fdDir *dirp)
 		return 0;
 	}
 }
-// USE THE BOOLEAN OF IS_EXTENDED
-// IF EXTENDED, LOAD LAST DATA LOCATION WHICH GIVES YOU EXTENDED'S DATA LOCATIONS
-// DO THE SAME IF EXTENDED IS EXTENDED
-
-// test7: . , .. , lmao1 , lmao2 , extended
-// test7: . , .. , lmao1 , " " , extended
-//
-struct fs_diriteminfo *fs_readdir(fdDir *dirp)
+int fs_stat(const char *path, struct fs_stat *buf)
 {
-
-	if (is_directory_open(dirp->pathname) == 1) // check if dir is already open
+	if (cwd == NULL)
 	{
-		struct fs_diriteminfo *dir_info = malloc(sizeof(struct fs_diriteminfo));
-		DirectoryEntry *temp = malloc(sizeof(DirectoryEntry));
-		if (dirp->read_index == MAX_ENTRIES - 1 && dirp->dir->extended == FALSE)
-		{
-			printf("NOTHING LEFT TO READ!\n");
-			return NULL;
-		}
-		else if (dirp->read_index == MAX_ENTRIES - 1 && dirp->dir->extended == TRUE)
-		{
-			printf("CHECKING EXTENDS FOR READ! [%d]\n", dirp->dir->data_locations[dirp->read_index]);
-			temp = check_extends_read(dirp->dir->data_locations[dirp->read_index], &dirp);
-			if (temp == NULL)
-			{
-				printf("NOTHING LEFT TO READ!\n");
-				return NULL;
-			}
-			dirp->extended_read_index++;
-			strcpy(dir_info->d_name, temp->name);
-			dir_info->d_reclen = sizeof(struct fs_diriteminfo);
-			// if (dirp->extended_read_index == EXTENDED_ENTRIES - 1)
-			// {
-			// 	printf("RESETTING EXTENDED READ INDEX RN\n");
-			// 	dirp->extended_read_index = 1;
-			// }
-
-			if (temp->isDirectory == TRUE)
-			{
-
-				dir_info->fileType = FT_DIRECTORY;
-			}
-			else
-			{
-
-				dir_info->fileType = FT_REGFILE;
-			}
-			return dir_info;
-		}
-		else
-		{
-			printf("\nWHAT I WANT TO SEE NOW %d\n", dirp->dir->data_locations[dirp->read_index]);
-			LBAread(temp, 1, dirp->dir->data_locations[dirp->read_index]);
-
-			dirp->read_index++;
-			printf("DIR INFO READ INDEX BEFORE IF: %d\n", dirp->read_index);
-			if (strcmp(temp->name, " ") == 0)
-			{
-				while (strcmp(temp->name, " ") == 0)
-				{
-					if (dirp->read_index == MAX_ENTRIES - 1)
-					{
-						printf("HIT BREAK WHEN I READ: %d\n", dirp->read_index - 1);
-						break;
-					}
-					printf("DIR INFO READ INDEX AFTER IF: %d\n", dirp->read_index);
-					LBAread(temp, 1, dirp->dir->data_locations[dirp->read_index]);
-					dirp->read_index++;
-				}
-			}
-
-			strcpy(dir_info->d_name, temp->name);
-
-			// CAN HE GO BACK ?
-			dir_info->d_reclen = sizeof(struct fs_diriteminfo);
-			if (temp->isDirectory == TRUE)
-			{
-
-				dir_info->fileType = FT_DIRECTORY;
-			}
-			else
-			{
-
-				dir_info->fileType = FT_REGFILE;
-			}
-
-			return dir_info;
-		}
+		cwd = malloc(sizeof(DirectoryEntry));
+		LBAread(cwd, 1, 6); // root
 	}
-	else
+	Container *container = malloc(sizeof(Container));
+	container = parse_path(path, cwd);
+	if (container == NULL)
 	{
-		perror("DIRECTORY IS NOT OPEN\n");
-		return NULL;
+		return -1;
 	}
+	// Error, dir doesnt exist
+	if (container->index == -1)
+	{
+		return -1;
+	}
+	buf->st_size = container->dir_entry->size;
+	buf->st_modtime = container->dir_entry->last_mod;
+	buf->st_createtime = container->dir_entry->creation_date;
+	buf->st_accesstime = container->dir_entry->last_access;
+	buf->st_blocks = container->dir_entry->starting_bock;
+	return 1;
 }
