@@ -98,7 +98,7 @@ b_io_fd b_open(char *filename, int flags)
 		return -1;
 	}
 
-	//Setting the file's access mode based on the flag
+	//Setting the flags and determining the access mode
 	if (flags == O_RDONLY)
 	{
 		fcb->flags = B_READ;
