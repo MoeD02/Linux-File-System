@@ -69,7 +69,7 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	fdDir *test = malloc(sizeof(fdDir));
 
 	// printf("****RESULT OF IS FILE: %d\n", fs_isFile("test1"));
-	// fdDir *test = malloc(sizeof(fdDir));
+	//fdDir *test = malloc(sizeof(fdDir));
 
 	// test = fs_opendir("/test1");
 
@@ -79,14 +79,18 @@ int initFileSystem(uint64_t numberOfBlocks, uint64_t blockSize)
 	// first
 	// fs_mkdir("test1/test1", 2);
 	// fs_mkdir("test1/test3", 2);
-	fs_mkdir("test1/test4", 2);
+	fs_mkdir("/test1/test4", 2);
 
-	fs_mkdir("test1/test5", 2);
+	fs_mkdir("/test1/test5", 2);
 
-	fs_mkdir("test1/test7", 2);
-	fs_mkdir("lmao", 2);
-	fs_mkdir("test1/test7/lmao", 2);
-	//test = fs_opendir("test1/test7/lmao");
+	fs_mkdir("/test1/test7", 2);
+	fs_mkdir("/test1/test7/lmao", 2);
+	fs_setcwd("/test1/test7");
+	// fs_mkdir("lmao2", 1);
+
+	// fs_mkdir("/lmao", 2);
+	// fs_mkdir("lmao3", 1);
+	//test = fs_opendir("lmao");
 	//fs_closedir(test);
 	//fdDir *test1 = malloc(sizeof(fdDir));
 	//fs_mkdir("test1/test6", 2);
