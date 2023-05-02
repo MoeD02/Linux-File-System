@@ -398,7 +398,6 @@ fdDir *fs_opendir(const char *pathname)
                 break;
             }
         }
-
         // Initialize file descriptor for the directory
         fd->dir = malloc(sizeof(DirectoryEntry));
         LBAread(fd->dir, 1, container->index);
