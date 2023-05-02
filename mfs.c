@@ -41,7 +41,7 @@ int fs_mkdir(const char *pathname, mode_t mode)
 	{
 		cwd = malloc(sizeof(DirectoryEntry));
 		cwd_path = malloc(sizeof('/') + 1);
-		memcpy(cwd_path, "/", sizeof(char));
+		memcpy(cwd_path, "/", sizeof(char)+1);
 		LBAread(cwd, 1, 6);
 	}
 	// absolute: make cwd root and save state to recover later
@@ -627,8 +627,12 @@ int fs_setcwd(char *pathname)
     }
 
     // Reallocate and update the current working directory path
-    cwd_path = realloc(cwd_path, sizeof(pathname) + sizeof(cwd_path) + 1);
-	strcat(cwd_path, pathname);
+    cwd_path = realloc(cwd_path, sizeof(pathname) + sizeof(cwd_path) + 2);
+	if(pathname[strlen(pathname) - 1] != '/'){
+		strcat(cwd_path, pathname);
+		strcat(cwd_path, "/");
+	}
+		
 	
 	free(container);
 	return 0;
