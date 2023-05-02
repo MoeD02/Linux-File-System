@@ -112,13 +112,6 @@ b_io_fd b_open(char *filename, int flags)
 	}
 
 
-	//check if container or directoryentry is null and if so, the file doesn't exist	
-    if (!container || !container->dir_entry) {
-        printf("File not found\n");
-        return -1;
-    }
-
-
 	//Initializing FCB
 	fcb->fi = fi;
 	fcb->buf = malloc(B_CHUNK_SIZE);
